@@ -1,4 +1,4 @@
-class Tube {
+ class Tube {
     constructor(x, y, z, rotarySections, linearSections, length, radius) {
         this.numLeds = rotarySections*linearSections;
         let geometry = new THREE.BufferGeometry();
@@ -15,7 +15,7 @@ class Tube {
                 let angle = rotaryIndex * Math.PI * 2 / rotarySectionsAdjusted;
                 vertices.push(radius * Math.cos(angle), radius * Math.sin(angle), heightIndex * length / linearSections);
                 normals.push(Math.cos(angle), Math.sin(angle), 1.0);
-                colors.push(1.0,1.0,1.0)
+                colors.push(0.1,0.1,0.1)
             }
         }
 
@@ -30,6 +30,19 @@ class Tube {
                 indices.push(bottomLeftIndex, bottomRightIndex, topLeftIndex);
                 indices.push(bottomRightIndex, topRightIndex, topLeftIndex);
             }
+        }
+
+        // map where the vertex index is saved in a map in the location of it's Octo address
+        // always starts at 0. if more than 1 tube is used please apply an offset from this
+        // TODO this is not very general and would probaly break in a lot of cases
+        this.twoGroupMap = []
+        for (let i = 0; i < (linearSections * rotarySections); i++) {
+            let rotaryIndex = Math.floor(i / linearSections);
+            let up = (rotaryIndex % 2 === 0 && rotaryIndex < rotarySectionsAdjusted/2) ||
+                        (rotaryIndex % 2 !== 0 && rotaryIndex >= rotarySectionsAdjusted/2);
+            let heightIndex = up ? i % linearSections : (linearSections - i % linearSections) ;
+            this.twoGroupMap.push(heightIndex*rotarySections + rotaryIndex)
+            // console.log(i, heightIndex, rotaryIndex, this.twoGroupMap[this.twoGroupMap.length-1]);
         }
 
         geometry.setIndex( indices );
@@ -62,6 +75,10 @@ class Tube {
         });
         this.mesh = new THREE.Mesh( geometry, material );
         this.mesh.position.set( x, y, z );
+    }
+
+    setLEDValueMapped(i, r, g, b) {
+        this.setLEDValue(this.twoGroupMap[i], r, g, b);
     }
 
     setLEDValue(i, r, g, b) {

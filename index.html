@@ -13,20 +13,15 @@
 		<script src="js/three.js"></script>
 		<script src="js/stats.js"></script>
 		<script src="js/factory.js"></script>
+		<script src="js/pitch.js"></script>
 		<script>
             var container, stats;
         
             var scene = new THREE.Scene();
 
             var camera = new THREE.PerspectiveCamera( 75, window.innerWidth / window.innerHeight, 0.1, 1000 );
-            let goal1Left = new Tube(-10, -2.5, 0.0, 6, 150, 5.0, 0.4);
-            let goal1Right = new Tube(-10, 2.5, 0.0, 6, 150, 5.0, 0.4);
-            let goal2Left = new Tube(10, 2.5, 0.0, 6, 150, 5.0, 0.4);
-            let goal2Right = new Tube(10, -2.5, 0.0, 6, 150, 5.0, 0.4);
-            scene.add(goal1Left.mesh);
-            scene.add(goal1Right.mesh);
-            scene.add(goal2Left.mesh);
-            scene.add(goal2Right.mesh);
+
+            var goals = new GoalController(scene);
 
             camera.rotation.x = Math.PI / 4.0;
             camera.position.z = 13;
@@ -40,21 +35,10 @@
             stats = new Stats();
             container.appendChild( stats.dom );
 
-            let r = 0.1;
-            let g = 0.3;
+            let tick = 0;
             function animate() {
-
-                r+=0.02;
-                g+=0.04;
-                if (r > 1.0) r = 0.0;
-
-                for (var i = 0; i < goal1Left.numLeds; i++) {
-                    goal1Left.setLEDValue(i, ((g*i)%180) / 180.0, 0, ((r*i)%80) / 80.0); 
-                }
-
-                for (var i = 0; i < goal2Left.numLeds; i++) {
-                    goal2Left.setLEDValue(i, ((g*i)%180) / 180.0, ((r*i)%80) / 80.0, 0); 
-                }
+                goals.update(tick);
+                tick+=10;
 
                 requestAnimationFrame( animate );
                 renderer.render( scene, camera );
