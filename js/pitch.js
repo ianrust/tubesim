@@ -1,5 +1,5 @@
 class GoalController {
-    constructor(scene) {
+    constructor(scene, getColor) {
         this.numStrips = 6;
         this.ledsPerStrip = 150;
         this.goalPosts = [
@@ -12,24 +12,22 @@ class GoalController {
             scene.add(item.mesh);
         });
         this.totalLeds = this.numStrips * this.ledsPerStrip * this.goalPosts.length;
+        this.getColor = getColor;
     }
 
     // Calls the getColor function from the goal posts for each pixel and then updates it
     update(tick) {
         for (let i = 0; i < this.totalLeds; i++) {
-            if (i < tick % this.totalLeds) {
-                this.setLED(i, 0.0, 1.0, 0.0);
-            } else {
-                this.setLED(i, 0.0, 0.0, 0.0);
-            }
+            let color = this.getColor(i, tick);
+            this.setLED(i, color);
         }
     }
 
     // i is the OctoWS811 index of the LED
     // This assumes the goals have 900 addresses each, split in 2 groups
-    setLED(i, r, g, b) {
+    setLED(i, color) {
         let postIndex = Math.floor(i/(this.numStrips * this.ledsPerStrip));
         let tubeIndex = i % (this.numStrips * this.ledsPerStrip);
-        this.goalPosts[postIndex].setLEDValueMapped(tubeIndex, r, g, b)
+        this.goalPosts[postIndex].setLEDValueMapped(tubeIndex, color[0], color[1], color[2])
     }
 }

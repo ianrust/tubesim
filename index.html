@@ -15,36 +15,41 @@
 		<script src="js/factory.js"></script>
 		<script src="js/pitch.js"></script>
 		<script>
-            var container, stats;
-        
-            var scene = new THREE.Scene();
+            var Module = {
+                onRuntimeInitialized: () => {
+                    var container, stats;
 
-            var camera = new THREE.PerspectiveCamera( 75, window.innerWidth / window.innerHeight, 0.1, 1000 );
+                    var scene = new THREE.Scene();
 
-            var goals = new GoalController(scene);
+                    var camera = new THREE.PerspectiveCamera( 75, window.innerWidth / window.innerHeight, 0.1, 1000 );
+                    var goals = new GoalController(scene, Module.getGoalColor);
 
-            camera.rotation.x = Math.PI / 4.0;
-            camera.position.z = 13;
-            camera.position.y = -13;
+                    camera.rotation.x = Math.PI / 4.0;
+                    camera.position.z = 13;
+                    camera.position.y = -13;
 
-            var renderer = new THREE.WebGLRenderer();
-            renderer.setSize( window.innerWidth, window.innerHeight );
-            document.body.appendChild( renderer.domElement );
-			container = document.getElementById( 'container' );
-            container.appendChild( renderer.domElement );
-            stats = new Stats();
-            container.appendChild( stats.dom );
+                    var renderer = new THREE.WebGLRenderer();
+                    renderer.setSize( window.innerWidth, window.innerHeight );
+                    document.body.appendChild( renderer.domElement );
+                    container = document.getElementById( 'container' );
+                    container.appendChild( renderer.domElement );
+                    stats = new Stats();
+                    container.appendChild( stats.dom );
 
-            let tick = 0;
-            function animate() {
-                goals.update(tick);
-                tick+=10;
+                    let tick = 0;
+                    function animate() {
+                        goals.update(tick);
 
-                requestAnimationFrame( animate );
-                renderer.render( scene, camera );
-				stats.update();
-            }
-            animate();
+                        requestAnimationFrame( animate );
+                        renderer.render( scene, camera );
+                        stats.update();
+
+                        tick++;
+                    }
+                    animate();
+                }
+            };
 		</script>
+		<script src="js/patterns.js"></script>
 	</body>
 </html>
