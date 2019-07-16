@@ -2,10 +2,10 @@
 
 #include "types.h"
 
-Color getGoalColorPortable(int address, int tick) {
+Color8bit getGoalColorPortable(int address, int tick) {
     if (address > tick) {
-        return Color(0, 0, float(address%150) / 150.0);
+        return Color8bit(0, 0, int(float(address%150) * 255.0 / 150.0));
     } else {
-        return Color(float(tick % 30) / 30.0, float(address%50) / 50.0, 0);
+        return Color8bit(int(float(tick % 30) * 255.0/ 30.0), int(float(address % 50) * 255.0/ 50.0), 0);
     }
 }
