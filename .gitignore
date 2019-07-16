@@ -1,3 +1,5 @@
 js/patterns.*
 .vscode
 .pio
+.idea
+.pioenvs

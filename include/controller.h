@@ -1,5 +1,6 @@
 #include <Arduino.h>
 #include <patterns.h>
+#include <audio.h>
 #include <OctoWS2811.h>
 
 #ifdef GOALS
@@ -19,6 +20,7 @@ const int config = WS2811_GRB | WS2811_800kHz;
 OctoWS2811 leds(ledsPerStrip, displayMemory, drawingMemory, config);
 
 void setup() {
+  setupSpectrum();
   leds.begin();
 }
 
