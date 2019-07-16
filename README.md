@@ -1,9 +1,23 @@
 # ledsoccer
 
-TODOs
+# Dependencies
+
+[Emscripten](https://emscripten.org/docs/getting_started/downloads.html) (note that emsdk must be put at ~/)
+
+python3
+
+[platform.io](https://platformio.org/) (optional, required for programming board)
+
+
+## How to run
+
+./compile_and_run.sh
+
+
+## TODOs
 
 Make sidelines by either expanding Tube to have a special "1-sided" mode or it's own class
-    they need to have way different indexing and have the ability for angles
+    they need to have way different indexing (start at the center) and have the ability for angles
 
 Serial to browser w/ frequencies 
 
