@@ -1,5 +1,5 @@
 #include <emscripten/bind.h>
-#include "goal_pattern.h"
+#include "patterns.h"
 
 using namespace emscripten;
 
@@ -15,12 +15,12 @@ struct ColorNormalized {
     }
 };
 
-ColorNormalized getGoalColor(int address, int tick) {
-    return ColorNormalized(getGoalColorPortable(address, tick));
+ColorNormalized getGoalsColor(int address, int tick) {
+    return ColorNormalized(getGoalsColorPortable(address, tick));
 }
 
 EMSCRIPTEN_BINDINGS(my_module) {
-    function("getGoalColor", &getGoalColor);
+    function("getGoalsColor", &getGoalsColor);
     value_array<ColorNormalized>("ColorNormalized")
         .element(&ColorNormalized::r)
         .element(&ColorNormalized::g)

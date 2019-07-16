@@ -1,8 +1,15 @@
 #include <Arduino.h>
-#include <goal_pattern.h>
+#include <patterns.h>
 #include <OctoWS2811.h>
 
+#ifdef GOALS
 const int ledsPerStrip = 450;
+#define GET_COLOR getGoalsColorPortable
+#endif
+#ifdef LINES
+const int ledsPerStrip = 600;
+#define GET_COLOR getLinesColorPortable
+#endif
 
 DMAMEM int displayMemory[ledsPerStrip*8];
 int drawingMemory[ledsPerStrip*8];
@@ -18,8 +25,8 @@ void setup() {
 void loop() {
   int tick = 0;
   for (int i = 0; i < leds.numPixels(); i++) {
-    getGoalColorPortable(i, tick);
-    Color8bit color = getGoalColorPortable(i, tick);
+    GET_COLOR(i, tick);
+    Color8bit color = GET_COLOR(i, tick);
     leds.setPixel(i, color.r, color.g, color.b);
     tick++;
   }
