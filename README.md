@@ -21,6 +21,8 @@ hooray!
 
 ## TODOs
 
+Fix the arduino scripts, ie make them actually run
+
 Make sidelines by either expanding Tube to have a special "1-sided" mode or it's own class
     they need to have way different indexing (start at the center) and have the ability for angles
 

@@ -1,3 +1,6 @@
+// 63Hz, 160Hz, 400Hz, 1kHz, 2.5kHz, 6.25kHz, 16kHz
+float Bands[7] = {63.0, 160.0, 400.0, 1000.0, 2500.0, 6250.0, 16000.0};
+
 //Declare Spectrum Shield pin connections
 #define STROBE 29
 #define RESET 30
@@ -6,29 +9,113 @@
 
 uint16_t raw_left[7];
 uint16_t raw_right[7];
-uint16_t raw[7];
+uint16_t tare_left[7];
+uint16_t tare_right[7];
+float raw_mixed[7];
 
-float lpf_alpha[7] = {0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1};
-uint16_t lpf_output[7] = {0, 0, 0, 0, 0, 0, 0};
+float lpf_alpha[7] = {0.15, 0.15, 0.15, 0.15, 0.25, 0.25, 0.25};
+float lpf_output[7] = {0, 0, 0, 0, 0, 0, 0};
+
+uint8_t freq_amp;
+
+// filtered variables
+uint64_t last_spectrum_read_micros = 0;
+uint64_t spectrum_read_period_micros = 15000;
+uint64_t current_micros;
+
+uint64_t last_micros = 0;
+
+void spectrumPlot() {
+    for (freq_amp = 0; freq_amp<7; freq_amp++)
+    {
+        Serial.print(raw_mixed[freq_amp]);
+        Serial.print(" ");
+    }
+    Serial.println("");
+    for (freq_amp = 0; freq_amp<7; freq_amp++)
+    {
+        Serial.print(lpf_output[freq_amp]);
+        Serial.print(" ");
+    }
+    Serial.println("");
+    for (int level_bin = 0; level_bin <= 1000; level_bin+=100) {
+        for (freq_amp = 0; freq_amp<7; freq_amp++)
+        {
+        if (lpf_output[freq_amp] > level_bin) {
+            Serial.print("@");
+        } else{
+            Serial.print(" ");
+        }
+        }
+        Serial.println("");
+    }
+}
+
+/*******************Pull frquencies from Spectrum Shield********************/
+void readFrequencies() {
+    //Read frequencies for each band
+    for (freq_amp = 0; freq_amp<7; freq_amp++)
+    {
+        digitalWrite(STROBE, LOW);
+        delayMicroseconds(20);
+        raw_left[freq_amp] = analogRead(DC_One) - tare_left[freq_amp];
+        raw_right[freq_amp] = analogRead(DC_Two) - tare_right[freq_amp];
+        raw_mixed[freq_amp] = raw_right[freq_amp]/2.0 + raw_left[freq_amp]/2.0;
+        digitalWrite(STROBE, HIGH);
+    }
+}
+
+void filterFrequencies() {
+    for (freq_amp = 0; freq_amp<7; freq_amp++) {
+        lpf_output[freq_amp] = 
+            (1.0-lpf_alpha[freq_amp]) * lpf_output[freq_amp] +
+            lpf_alpha[freq_amp] * raw_mixed[freq_amp];
+    }
+}
+
+void readFrequenciedTimed() {
+    current_micros = micros();
+    if (current_micros - last_spectrum_read_micros > spectrum_read_period_micros) {
+        last_spectrum_read_micros += spectrum_read_period_micros;
+        readFrequencies();
+        filterFrequencies();
+
+        // TODO make these interpretations available
+        // dominant_bass = (lpf_output[0] * Bands[0] + lpf_output[1] * Bands[1]) / (lpf_output[0] + lpf_output[1]);
+        // dominant_vocal = (lpf_output[2] * Bands[2] + lpf_output[3] * Bands[3]) / (lpf_output[2] + lpf_output[3]);
+        // active_snare = raw_left[6] > 600 || raw_left[5] > 600;
+        // bin_centroid = Compute_Bin_Centroid();
+    }
+}
+
+void zeroSpectrum() {
+    readFrequencies();
+    for (freq_amp = 0; freq_amp<7; freq_amp++) {
+        tare_left[freq_amp] = raw_right[freq_amp];
+        tare_right[freq_amp] = raw_right[freq_amp];
+    }
+}
 
 void setupSpectrum() {
-  //Set spectrum Shield pin configurations
-  pinMode(STROBE, OUTPUT);
-  pinMode(RESET, OUTPUT);
-  pinMode(DC_One, INPUT);
-  pinMode(DC_Two, INPUT);
-  digitalWrite(STROBE, HIGH);
-  digitalWrite(RESET, HIGH);
+    //Set spectrum Shield pin configurations
+    // pinMode(STROBE, OUTPUT);
+    // pinMode(RESET, OUTPUT);
+    // pinMode(DC_One, INPUT);
+    // pinMode(DC_Two, INPUT);
+    // digitalWrite(STROBE, HIGH);
+    // digitalWrite(RESET, HIGH);
 
-  //Initialize Spectrum Analyzers
-  digitalWrite(STROBE, LOW);
-  delay(1);
-  digitalWrite(RESET, HIGH);
-  digitalWrite(STROBE, HIGH);
-  delay(1);
-  digitalWrite(STROBE, LOW);
-  delay(1);
-  digitalWrite(RESET, LOW);
-  digitalWrite(STROBE, HIGH);
-  delay(1);
+    // //Initialize Spectrum Analyzers
+    // digitalWrite(STROBE, LOW);
+    // delay(1);
+    // digitalWrite(RESET, HIGH);
+    // digitalWrite(STROBE, HIGH);
+    // delay(1);
+    // digitalWrite(STROBE, LOW);
+    // delay(1);
+    // digitalWrite(RESET, LOW);
+    // digitalWrite(STROBE, HIGH);
+    // delay(100);
+    
+    // zeroSpectrum();
 }
