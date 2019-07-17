@@ -1,8 +1,16 @@
-#include <OctoWS2811.h>
-#include <audio.h>
-#include <patterns.h>
 
-const int ledsPerStrip = 450;
+#include "patterns.h"
+#include "audio.h"
+#include <OctoWS2811.h>
+
+#ifdef GOALS
+const int ledsPerStrip = 300;
+#define GET_COLOR getGoalsColorPortable
+#endif
+#ifdef LINES
+const int ledsPerStrip = 600;
+#define GET_COLOR getLinesColorPortable
+#endif
 
 int tick = 0;
 int ledIndex = 0;
@@ -27,16 +35,22 @@ void setup() {
 }
 
 void loop() {
-  digitalWrite(LED_BUILTIN, indicator);
   for (ledIndex = 0; ledIndex < leds.numPixels() ; ledIndex++) {
-    color = getGoalsColorPortable(ledIndex, tick);
-    readFrequenciedTimed();
-    leds.setPixel(ledIndex, 255, 0.0, 0.0);
+    Color8bit color = GET_COLOR(ledIndex, tick);
+    readFrequenciesTimed();
+    if (active_snare) {
+      leds.setPixel(ledIndex, 255, 255, 255);
+    } else {
+      leds.setPixel(ledIndex, color.r, color.g, color.b);
+    }
   }
   leds.show();
   tick++;
-  indicator = !indicator;
-  Serial.println(tick);
-  delay(500);
-  // audio::spectrumPlot();
+
+  // slow indicator loop
+  if (tick % 5 == 0) {
+    indicator = !indicator;
+    digitalWrite(LED_BUILTIN, indicator);
+    spectrumPlot();
+  }
 }

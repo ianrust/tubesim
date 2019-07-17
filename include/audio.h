@@ -7,31 +7,46 @@ float Bands[7] = {63.0, 160.0, 400.0, 1000.0, 2500.0, 6250.0, 16000.0};
 #define DC_One A12
 #define DC_Two A13
 
-uint16_t raw_left[7];
-uint16_t raw_right[7];
-uint16_t tare_left[7];
-uint16_t tare_right[7];
+int16_t raw_left[7];
+int16_t raw_right[7];
+int16_t tare_left[7];
+int16_t tare_right[7];
 float raw_mixed[7];
 
-float lpf_alpha[7] = {0.15, 0.15, 0.15, 0.15, 0.25, 0.25, 0.25};
+float lpf_alpha[7] = {0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5};
 float lpf_output[7] = {0, 0, 0, 0, 0, 0, 0};
 
 uint8_t freq_amp;
 
 // filtered variables
 uint64_t last_spectrum_read_micros = 0;
-uint64_t spectrum_read_period_micros = 15000;
+uint64_t spectrum_read_period_micros = 1500;
 uint64_t current_micros;
 
 uint64_t last_micros = 0;
 
+bool active_snare;
+
 void spectrumPlot() {
+    Serial.println("\nRawLeft");
+    for (freq_amp = 0; freq_amp<7; freq_amp++)
+    {
+        Serial.print(raw_left[freq_amp]);
+        Serial.print(" ");
+    }
+    Serial.println("\nRaw Right");
+    for (freq_amp = 0; freq_amp<7; freq_amp++)
+    {
+        Serial.print(raw_right[freq_amp]);
+        Serial.print(" ");
+    }
+    Serial.println("\nRaw mixed");
     for (freq_amp = 0; freq_amp<7; freq_amp++)
     {
         Serial.print(raw_mixed[freq_amp]);
         Serial.print(" ");
     }
-    Serial.println("");
+    Serial.println("\nLPF");
     for (freq_amp = 0; freq_amp<7; freq_amp++)
     {
         Serial.print(lpf_output[freq_amp]);
@@ -73,7 +88,7 @@ void filterFrequencies() {
     }
 }
 
-void readFrequenciedTimed() {
+void readFrequenciesTimed() {
     current_micros = micros();
     if (current_micros - last_spectrum_read_micros > spectrum_read_period_micros) {
         last_spectrum_read_micros += spectrum_read_period_micros;
@@ -83,7 +98,7 @@ void readFrequenciedTimed() {
         // TODO make these interpretations available
         // dominant_bass = (lpf_output[0] * Bands[0] + lpf_output[1] * Bands[1]) / (lpf_output[0] + lpf_output[1]);
         // dominant_vocal = (lpf_output[2] * Bands[2] + lpf_output[3] * Bands[3]) / (lpf_output[2] + lpf_output[3]);
-        // active_snare = raw_left[6] > 600 || raw_left[5] > 600;
+        active_snare = lpf_output[6] > 600 || lpf_output[5] > 600;
         // bin_centroid = Compute_Bin_Centroid();
     }
 }
@@ -97,25 +112,25 @@ void zeroSpectrum() {
 }
 
 void setupSpectrum() {
-    //Set spectrum Shield pin configurations
-    // pinMode(STROBE, OUTPUT);
-    // pinMode(RESET, OUTPUT);
-    // pinMode(DC_One, INPUT);
-    // pinMode(DC_Two, INPUT);
-    // digitalWrite(STROBE, HIGH);
-    // digitalWrite(RESET, HIGH);
+    // Set spectrum Shield pin configurations
+    pinMode(STROBE, OUTPUT);
+    pinMode(RESET, OUTPUT);
+    pinMode(DC_One, INPUT);
+    pinMode(DC_Two, INPUT);
+    digitalWrite(STROBE, HIGH);
+    digitalWrite(RESET, HIGH);
 
-    // //Initialize Spectrum Analyzers
-    // digitalWrite(STROBE, LOW);
-    // delay(1);
-    // digitalWrite(RESET, HIGH);
-    // digitalWrite(STROBE, HIGH);
-    // delay(1);
-    // digitalWrite(STROBE, LOW);
-    // delay(1);
-    // digitalWrite(RESET, LOW);
-    // digitalWrite(STROBE, HIGH);
-    // delay(100);
+    //Initialize Spectrum Analyzers
+    digitalWrite(STROBE, LOW);
+    delay(1);
+    digitalWrite(RESET, HIGH);
+    digitalWrite(STROBE, HIGH);
+    delay(1);
+    digitalWrite(STROBE, LOW);
+    delay(1);
+    digitalWrite(RESET, LOW);
+    digitalWrite(STROBE, HIGH);
+    delay(100);
     
-    // zeroSpectrum();
+    zeroSpectrum();
 }
