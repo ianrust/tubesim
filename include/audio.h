@@ -16,6 +16,8 @@ float raw_mixed[7];
 float lpf_alpha[7] = {0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5};
 float lpf_output[7] = {0, 0, 0, 0, 0, 0, 0};
 
+int16_t freq_out[7];
+
 uint8_t freq_amp;
 
 // filtered variables
@@ -26,6 +28,7 @@ uint64_t current_micros;
 uint64_t last_micros = 0;
 
 bool active_snare;
+
 
 void spectrumPlot() {
     Serial.println("\nRawLeft");
@@ -95,11 +98,9 @@ void readFrequenciesTimed() {
         readFrequencies();
         filterFrequencies();
 
-        // TODO make these interpretations available
-        // dominant_bass = (lpf_output[0] * Bands[0] + lpf_output[1] * Bands[1]) / (lpf_output[0] + lpf_output[1]);
-        // dominant_vocal = (lpf_output[2] * Bands[2] + lpf_output[3] * Bands[3]) / (lpf_output[2] + lpf_output[3]);
-        active_snare = lpf_output[6] > 600 || lpf_output[5] > 600;
-        // bin_centroid = Compute_Bin_Centroid();
+        for (freq_amp = 0; freq_amp<7; freq_amp++) {
+            freq_out[freq_amp] = lpf_output[freq_amp];
+        }
     }
 }
 

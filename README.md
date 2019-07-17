@@ -21,18 +21,20 @@ hooray!
 
 ## TODOs
 
-Make sure LEDs have the right r,g,b order
+Frequency recording script, generate a few files.
+    Playback
 
-Make tubes have a 1 signal entrypoint
+Make sure timing matches in sim (specifically the "tick" variable)
 
 Make sidelines by either expanding Tube to have a special "1-sided" mode or it's own class
     they need to have way different indexing (start at the center) and have the ability for angles
 
-Serial to browser w/ frequency spectrum
-    needs integration w/ audio board with filters and such
+Make sure LEDs have the right r,g,b order
 
-I'm not that impressed with the performance of the spectrum chip. We should really be able to do an fft, but that is hard.
+Make tubes have a 1 signal entrypoint
 
 Get index -> spatial location working w/ a common definition with the Tube object since so much of that lives there. In the future this could be a config file?
+
+I'm not that impressed with the performance of the spectrum chip. We should really be able to do an fft, but that is hard.
 
 Nice-to-have, better realism: try adding diffusers, ie cylinders w/ low alpha and blend turned on.

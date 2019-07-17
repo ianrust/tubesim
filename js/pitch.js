@@ -18,7 +18,20 @@ class GoalController {
     // Calls the getColor function from the goal posts for each pixel and then updates it
     update(tick) {
         for (let i = 0; i < this.totalLeds; i++) {
-            let color = this.getColor(i, tick);
+            // let color = this.getColor(i, tick,  freq0,
+            //                                     freq1,
+            //                                     freq2,
+            //                                     freq3,
+            //                                     freq4,
+            //                                     freq5,
+            //                                     freq6);
+            let color = this.getColor(i, tick,  0,
+                                                0,
+                                                0,
+                                                0,
+                                                0,
+                                                0,
+                                                0);
             this.setLED(i, color);
         }
     }

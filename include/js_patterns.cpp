@@ -15,8 +15,23 @@ struct ColorNormalized {
     }
 };
 
-ColorNormalized getGoalsColor(int address, int tick) {
-    return ColorNormalized(getGoalsColorPortable(address, tick));
+
+ColorNormalized getGoalsColor(int address, int tick, int16_t freq0,
+                                                     int16_t freq1,
+                                                     int16_t freq2,
+                                                     int16_t freq3,
+                                                     int16_t freq4,
+                                                     int16_t freq5,
+                                                     int16_t freq6) {
+    int16_t freq_input[7];
+    freq_input[0] = freq0; 
+    freq_input[1] = freq1; 
+    freq_input[2] = freq2; 
+    freq_input[3] = freq3; 
+    freq_input[4] = freq4; 
+    freq_input[5] = freq5; 
+    freq_input[6] = freq6; 
+    return ColorNormalized(getGoalsColorPortable(address, tick, freq_input));
 }
 
 EMSCRIPTEN_BINDINGS(my_module) {
