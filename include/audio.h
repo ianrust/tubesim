@@ -13,7 +13,7 @@ int16_t tare_left[7];
 int16_t tare_right[7];
 float raw_mixed[7];
 
-float lpf_alpha[7] = {0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5};
+float lpf_alpha[7] = {0.05, 0.05, 0.05, 0.05, 0.05, 0.05, 0.05};
 float lpf_output[7] = {0, 0, 0, 0, 0, 0, 0};
 
 int16_t freq_out[7];
@@ -24,10 +24,6 @@ uint8_t freq_amp;
 uint64_t last_spectrum_read_micros = 0;
 uint64_t spectrum_read_period_micros = 1500;
 uint64_t current_micros;
-
-uint64_t last_micros = 0;
-
-bool active_snare;
 
 
 void spectrumPlot() {
@@ -134,4 +130,6 @@ void setupSpectrum() {
     delay(100);
     
     zeroSpectrum();
+
+    last_spectrum_read_micros = micros();
 }

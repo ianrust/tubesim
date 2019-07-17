@@ -43,17 +43,13 @@ void loop() {
   for (ledIndex = 0; ledIndex < leds.numPixels() ; ledIndex++) {
     readFrequenciesTimed();
     Color8bit color = GET_COLOR(ledIndex, tick, freq_out);
-    if (active_snare) {
-      leds.setPixel(ledIndex, 255, 255, 255);
-    } else {
-      leds.setPixel(ledIndex, color.r, color.g, color.b);
-    }
+    leds.setPixel(ledIndex, color.r, color.g, color.b);
   }
   leds.show();
   tick++;
 
   // slow indicator loop
-  if (tick % 5 == 0) {
+  if (tick % 10 == 0) {
     indicator = !indicator;
     digitalWrite(LED_BUILTIN, indicator);
     spectrumPlot();
@@ -61,20 +57,26 @@ void loop() {
 }
 #else
 
-int period = 10000;
+uint64_t sample_period_micros = 3333; // 30 Hz
+uint64_t last_micros_sample = 0;
+
 char serialized_freq[14];
 
 void setup() {
-  delay(100);
-  Serial.begin(9600);
+  Serial.begin(115200);
+  delay(1000);
   setupSpectrum();
   delay(100);
 }
 
 void loop() {
+  if (last_micros_sample == 0) {
+    last_micros_sample = micros();
+  }
   readFrequenciesTimed();
-  if (tick % period == 0) {
-    memcpy(freq_out, serialized_freq, sizeof(freq_out));
+  if ((current_micros - last_micros_sample) > sample_period_micros) {
+    last_micros_sample += sample_period_micros;
+    memcpy(serialized_freq, freq_out, sizeof(freq_out));
     Serial.write(serialized_freq, sizeof(serialized_freq));
     Serial.write("\n");
   }

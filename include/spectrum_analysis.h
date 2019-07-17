@@ -1,5 +1,20 @@
+void normalize255(int16_t* freq) {
+    uint16_t total = 0;
+    for (int i = 0; i < 7; i++) {
+        total += freq[i];
+    }
+    for (int i = 0; i < 7; i++) {
+        freq[i] = std::max(0, std::min(255, (255 * freq[i]) / total));
+    }
+}
+
 bool isClapping(int16_t* freq) {
-    return freq[6] > 200;
+    for (int i = 0; i < 7; i++) {
+        if (freq[i] > freq[6]) {
+            return false;
+        }
+    }
+    return true;
 }
 
 // TODO make these interpretations available
