@@ -1,10 +1,10 @@
 #include <Arduino.h>
-#include <patterns.h>
-#include <audio.h>
+#include "patterns.h"
+#include "audio.h"
 #include <OctoWS2811.h>
 
 #ifdef GOALS
-const int ledsPerStrip = 450;
+const int ledsPerStrip = 150;
 #define GET_COLOR getGoalsColorPortable
 #endif
 #ifdef LINES
@@ -24,13 +24,13 @@ void setup() {
   leds.begin();
 }
 
+int tick = 0;
 void loop() {
-  int tick = 0;
   for (int i = 0; i < leds.numPixels(); i++) {
-    GET_COLOR(i, tick);
     Color8bit color = GET_COLOR(i, tick);
     leds.setPixel(i, color.r, color.g, color.b);
-    tick++;
   }
+  tick++;
+  Serial.println(tick);
   leds.show();
 }
