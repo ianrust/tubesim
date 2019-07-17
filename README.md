@@ -21,13 +21,17 @@ hooray!
 
 ## TODOs
 
-Fix the arduino scripts, ie make them actually run
+Make sure LEDs have the right r,g,b order
+
+Make tubes have a 1 signal entrypoint
 
 Make sidelines by either expanding Tube to have a special "1-sided" mode or it's own class
     they need to have way different indexing (start at the center) and have the ability for angles
 
 Serial to browser w/ frequency spectrum
     needs integration w/ audio board with filters and such
+
+I'm not that impressed with the performance of the spectrum chip. We should really be able to do an fft, but that is hard.
 
 Get index -> spatial location working w/ a common definition with the Tube object since so much of that lives there. In the future this could be a config file?
 
