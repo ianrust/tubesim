@@ -50,7 +50,7 @@
             let rotaryIndex = Math.floor(i / linearSections);
             let up = rotaryIndex % 2 === 0;
             let heightIndex = up ? i % linearSections : (linearSections - i % linearSections) ;
-            this.twoGroupMap.push(heightIndex*rotarySections + rotaryIndex)
+            this.oneGroupMap.push(heightIndex*rotarySections + rotaryIndex)
         }
 
         geometry.setIndex( indices );

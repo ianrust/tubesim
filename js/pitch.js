@@ -32,7 +32,6 @@ class GoalController {
     }
 
     // i is the OctoWS811 index of the LED
-    // This assumes the goals have 900 addresses each, split in 2 groups
     setLED(i, color) {
         let postIndex = Math.floor(i/(this.numStrips * this.ledsPerStrip));
         let tubeIndex = i % (this.numStrips * this.ledsPerStrip);
