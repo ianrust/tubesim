@@ -19,6 +19,14 @@ bool isClapping(int16_t* freq) {
     return true;
 }
 
+int16_t sum(int16_t* freq) {
+    int16_t sum = 0;
+    for (int i = 0; i < 7; i++) {
+        sum += freq[i];
+    }
+    return sum;
+}
+
 // TODO make these interpretations available
 // dominant_bass = (lpf_output[0] * Bands[0] + lpf_output[1] * Bands[1]) / (lpf_output[0] + lpf_output[1]);
 // dominant_vocal = (lpf_output[2] * Bands[2] + lpf_output[3] * Bands[3]) / (lpf_output[2] + lpf_output[3]);

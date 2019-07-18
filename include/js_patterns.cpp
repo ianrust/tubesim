@@ -16,13 +16,13 @@ struct ColorNormalized {
 };
 
 
-ColorNormalized getGoalsColor(int address, int tick, bool goal_left, bool goal_right, int16_t freq0,
-                                                                                      int16_t freq1,
-                                                                                      int16_t freq2,
-                                                                                      int16_t freq3,
-                                                                                      int16_t freq4,
-                                                                                      int16_t freq5,
-                                                                                      int16_t freq6) {
+ColorNormalized getGoalsColor(int address, ControllerState state, int16_t freq0,
+                                                                  int16_t freq1,
+                                                                  int16_t freq2,
+                                                                  int16_t freq3,
+                                                                  int16_t freq4,
+                                                                  int16_t freq5,
+                                                                  int16_t freq6) {
     int16_t freq_input[7];
     freq_input[0] = freq0; 
     freq_input[1] = freq1; 
@@ -31,11 +31,19 @@ ColorNormalized getGoalsColor(int address, int tick, bool goal_left, bool goal_r
     freq_input[4] = freq4; 
     freq_input[5] = freq5; 
     freq_input[6] = freq6; 
-    return ColorNormalized(getGoalsColorPortable(address, tick, goal_left, goal_right, freq_input));
+    return ColorNormalized(getGoalsColorPortable(address, state, freq_input));
 }
 
 EMSCRIPTEN_BINDINGS(my_module) {
     emscripten::function("getGoalsColor", &getGoalsColor);
+    emscripten::class_<ControllerState>("ControllerState")
+        .constructor<>()
+        .property("tick", &ControllerState::tick)
+        .property("goal_left", &ControllerState::goal_left)
+        .property("goal_right", &ControllerState::goal_right)
+        .property("music_on", &ControllerState::music_on)
+        .function("updateEvent", &ControllerState::updateEvent)
+        .function("updateOutputState", &ControllerState::updateOutputState);
     value_array<ColorNormalized>("ColorNormalized")
         .element(&ColorNormalized::r)
         .element(&ColorNormalized::g)

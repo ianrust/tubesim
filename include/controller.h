@@ -3,10 +3,12 @@
 
 #ifdef GOALS
 const int ledsPerStrip = 300;
+const int numActiveAddresses = ledsPerStrip * 4;
 #define GET_COLOR getGoalsColorPortable
 #endif
 #ifdef LINES
 const int ledsPerStrip = 600;
+const int numActiveAddresses = ledsPerStrip * 7;
 #define GET_COLOR getLinesColorPortable
 #endif
 
@@ -16,6 +18,9 @@ int tick = 0;
 #ifndef RECORD
 #include "patterns.h"
 #include <OctoWS2811.h>
+
+#define PIN_LEFT 33
+#define PIN_RIGHT 34
 
 int ledIndex = 0;
 Color8bit color;
@@ -29,30 +34,33 @@ OctoWS2811 leds(ledsPerStrip, displayMemory, drawingMemory, config);
 
 bool indicator = false;
 
+ControllerState state;
+
+
 void setup() {
   leds.begin();
 
-  Serial.begin(9600);
   pinMode(LED_BUILTIN, OUTPUT);
+  pinMode(PIN_LEFT, INPUT_PULLUP);
+  pinMode(PIN_RIGHT, INPUT_PULLUP);
 
   setupSpectrum();
   delay(100);
 }
 
 void loop() {
-  for (ledIndex = 0; ledIndex < leds.numPixels() ; ledIndex++) {
+  state.update(!digitalRead(PIN_LEFT), !digitalRead(PIN_RIGHT), freq_out);
+  for (ledIndex = 0; ledIndex < numActiveAddresses ; ledIndex++) {
     readFrequenciesTimed();
-    Color8bit color = GET_COLOR(ledIndex, tick, false, false, freq_out);
+    Color8bit color = GET_COLOR(ledIndex, state, freq_out);
     leds.setPixel(ledIndex, color.r, color.g, color.b);
   }
   leds.show();
-  tick++;
 
   // slow indicator loop
   if (tick % 10 == 0) {
     indicator = !indicator;
     digitalWrite(LED_BUILTIN, indicator);
-    spectrumPlot();
   }
 }
 #else

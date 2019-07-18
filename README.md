@@ -23,6 +23,8 @@ hooray!
 
 Pipe goal left/right;
 
+Load in images as pattern, test on tube
+
 Get sound playing in browser so you can actually tell if it's a satisfying pattern
 
 Make sure timing matches in sim (specifically the "tick" variable)

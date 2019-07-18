@@ -1,5 +1,5 @@
 class GoalController {
-    constructor(scene, getColor, song) {
+    constructor(scene, getColor, song, stateClass) {
         this.numStrips = 6;
         this.ledsPerStrip = 50;
         this.goalPosts = [
@@ -14,19 +14,23 @@ class GoalController {
         this.totalLeds = this.numStrips * this.ledsPerStrip * this.goalPosts.length;
         this.getColor = getColor;
         this.song = song;
+        this.state = new stateClass();
     }
 
     // Calls the getColor function from the goal posts for each pixel and then updates it
-    update(tick) {
-        let freq = this.song[tick % song.length];
+    // Should match what is happening inside the loop in controller.h
+    update() {
+        let freq = this.song[this.state.tick % song.length];
+        this.state.updateOutputState();
+        console.log(this.state);
         for (let i = 0; i < this.totalLeds; i++) {
-            let color = this.getColor(i, tick, false, false, freq[0],
-                                                             freq[1],
-                                                             freq[2],
-                                                             freq[3],
-                                                             freq[4],
-                                                             freq[5],
-                                                             freq[6]);
+            let color = this.getColor(i, this.state, freq[0],
+                                                     freq[1],
+                                                     freq[2],
+                                                     freq[3],
+                                                     freq[4],
+                                                     freq[5],
+                                                     freq[6]);
             this.setLED(i, color);
         }
     }
