@@ -42,7 +42,15 @@
                         (rotaryIndex % 2 !== 0 && rotaryIndex >= rotarySectionsAdjusted/2);
             let heightIndex = up ? i % linearSections : (linearSections - i % linearSections) ;
             this.twoGroupMap.push(heightIndex*rotarySections + rotaryIndex)
-            // console.log(i, heightIndex, rotaryIndex, this.twoGroupMap[this.twoGroupMap.length-1]);
+        }
+
+        // map for octo address when all strips are chained togethe for a single tube
+        this.oneGroupMap = []
+        for (let i = 0; i < (linearSections * rotarySections); i++) {
+            let rotaryIndex = Math.floor(i / linearSections);
+            let up = rotaryIndex % 2 === 0;
+            let heightIndex = up ? i % linearSections : (linearSections - i % linearSections) ;
+            this.twoGroupMap.push(heightIndex*rotarySections + rotaryIndex)
         }
 
         geometry.setIndex( indices );
@@ -78,7 +86,7 @@
     }
 
     setLEDValueMapped(i, r, g, b) {
-        this.setLEDValue(this.twoGroupMap[i], r, g, b);
+        this.setLEDValue(this.oneGroupMap[i], r, g, b);
     }
 
     setLEDValue(i, r, g, b) {

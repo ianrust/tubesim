@@ -1,10 +1,12 @@
+using namespace std;
+
 void normalize255(int16_t* freq) {
     uint16_t total = 0;
     for (int i = 0; i < 7; i++) {
         total += freq[i];
     }
     for (int i = 0; i < 7; i++) {
-        freq[i] = std::max(0, std::min(255, (255 * freq[i]) / total));
+        freq[i] = max(0, min(255, (255 * freq[i]) / total));
     }
 }
 

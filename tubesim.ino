@@ -1,3 +1,3 @@
-#define RECORD
+#define GOALS
 
 #include "include/controller.h"

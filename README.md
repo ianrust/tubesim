@@ -21,8 +21,9 @@ hooray!
 
 ## TODOs
 
-Frequency recording script, generate a few files.
-    Playback
+Pipe goal left/right;
+
+Get sound playing in browser so you can actually tell if it's a satisfying pattern
 
 Make sure timing matches in sim (specifically the "tick" variable)
 
@@ -30,8 +31,7 @@ Make sidelines by either expanding Tube to have a special "1-sided" mode or it's
     they need to have way different indexing (start at the center) and have the ability for angles
 
 Make sure LEDs have the right r,g,b order
-
-Make tubes have a 1 signal entrypoint
+    Make a colormap for each LED type in order to get truer colors
 
 Get index -> spatial location working w/ a common definition with the Tube object since so much of that lives there. In the future this could be a config file?
 

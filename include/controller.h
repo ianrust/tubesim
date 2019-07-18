@@ -42,7 +42,7 @@ void setup() {
 void loop() {
   for (ledIndex = 0; ledIndex < leds.numPixels() ; ledIndex++) {
     readFrequenciesTimed();
-    Color8bit color = GET_COLOR(ledIndex, tick, freq_out);
+    Color8bit color = GET_COLOR(ledIndex, tick, false, false, freq_out);
     leds.setPixel(ledIndex, color.r, color.g, color.b);
   }
   leds.show();
