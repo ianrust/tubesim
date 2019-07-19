@@ -2,6 +2,7 @@
 
 #include "spectrum_analysis.h"
 #include "types.h"
+#include "../images/images.h"
 
 using namespace std;
 
@@ -45,9 +46,8 @@ private:
 // This will also take in the frequency information as well as any other inputs/state (ie button press changes state)
 Color8bit getGoalsColorPortable(int address, ControllerState state, int16_t* freq) {
     normalize255(freq);
-    bool clapping = isClapping(freq);
     if (state.music_on) {
-        if (clapping) {
+        if (isClapping(freq)) {
             return Color8bit(255, 255, 255);
         } else {
             return Color8bit(freq[0]*2*(address % 300) / 8,
@@ -55,11 +55,11 @@ Color8bit getGoalsColorPortable(int address, ControllerState state, int16_t* fre
                             freq[5]*(address % 50));
         }
     } else {
-        // only effect left adresses
+        // only effect left/right adresses
         if (address > 600 && state.goal_right) {
-            return Color8bit(255, 0, 0);
+            return Color8bit(uint8_t(255), uint8_t(0), organic[state.tick % organic_len]);
         } else if (address <= 600 && state.goal_left) {
-            return Color8bit(255, 0, 0);
+            return Color8bit(uint8_t(255), uint8_t(0), organic[state.tick % organic_len]);
         }
         return Color8bit(0, (state.tick + address)%300, address%160);
     }

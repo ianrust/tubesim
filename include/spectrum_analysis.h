@@ -6,7 +6,11 @@ void normalize255(int16_t* freq) {
         total += freq[i];
     }
     for (int i = 0; i < 7; i++) {
-        freq[i] = max(0, min(255, (255 * freq[i]) / total));
+        if (total > 0) {
+            freq[i] = max(0, min(255, (255 * freq[i]) / total));
+        } else {
+            freq[i] = 0;
+        }
     }
 }
 
