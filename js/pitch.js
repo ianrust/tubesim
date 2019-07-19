@@ -22,7 +22,6 @@ class GoalController {
     update() {
         let freq = this.song[this.state.tick % song.length];
         this.state.updateOutputState();
-        console.log(this.state);
         for (let i = 0; i < this.totalLeds; i++) {
             let color = this.getColor(i, this.state, freq[0],
                                                      freq[1],

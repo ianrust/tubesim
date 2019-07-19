@@ -13,8 +13,6 @@ const int numActiveAddresses = ledsPerStrip * 7;
 #endif
 
 
-int tick = 0;
-
 #ifndef RECORD
 #include "patterns.h"
 #include <OctoWS2811.h>
@@ -36,7 +34,6 @@ bool indicator = false;
 
 ControllerState state;
 
-
 void setup() {
   leds.begin();
 
@@ -52,13 +49,13 @@ void loop() {
   state.update(!digitalRead(PIN_LEFT), !digitalRead(PIN_RIGHT), freq_out);
   for (ledIndex = 0; ledIndex < numActiveAddresses ; ledIndex++) {
     readFrequenciesTimed();
-    Color8bit color = GET_COLOR(ledIndex, state, freq_out);
+    color = GET_COLOR(ledIndex, state, freq_out);
     leds.setPixel(ledIndex, color.r, color.g, color.b);
   }
   leds.show();
 
   // slow indicator loop
-  if (tick % 10 == 0) {
+  if (state.tick % 10 == 0) {
     indicator = !indicator;
     digitalWrite(LED_BUILTIN, indicator);
   }
