@@ -21,7 +21,7 @@ hooray!
 
 ## TODOs
 
-Load in images as pattern, test on tube
+Test images on on field
 
 Get sound playing in browser so you can actually tell if it's a satisfying pattern
 
