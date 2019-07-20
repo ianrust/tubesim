@@ -3,7 +3,7 @@ from PIL import Image
 
 if __name__ == "__main__":
     fn = sys.argv[1]
-    fn_img = fn + ".jpg"
+    fn_img = fn + ".png"
     fn_code = fn + ".h"
     with open(fn_code, "w+") as code:
 
@@ -11,9 +11,11 @@ if __name__ == "__main__":
 
             width, height = image.size
             code.write("size_t " + fn + "_len = " + str(width*height*3) + ";\r\n")
+            code.write("size_t " + fn + "_width = " + str(width) + ";\r\n")
+            code.write("size_t " + fn + "_height = " + str(height) + ";\r\n")
             code.write("uint8_t " + fn + "[" + str(width*height*3) + "] = { ")
-            for w in range(width):
-                for h in range(height):
+            for h in range(height):
+                for w in range(width):
                     rgb_im = image.convert('RGB')
                     r, g, b = rgb_im.getpixel((w, h))
                     if (r > 255 or g > 255 or b > 255):

@@ -1,1 +1,6 @@
 #include "organic.h"
+#include "hair.h"
+#include "leaves.h"
+#include "waves.h"
+#include "test.h"
+#include "pastel.h"

@@ -3,3 +3,4 @@ js/patterns.*
 .pio
 .idea
 .pioenvs
+.DS_Store
