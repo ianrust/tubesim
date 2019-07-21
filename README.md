@@ -6,6 +6,8 @@
 
 python3
 
+`pip install image` 
+
 [platform.io](https://platformio.org/) (optional, required for programming board)
 
 
