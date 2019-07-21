@@ -21,7 +21,10 @@ hooray!
 
 ## TODOs
 
-Test images on on field
+HOTTEST FIRE - Make sure the arduino doesn't crash
+    -currently happens after about an hour
+
+Test images on real tube - 6 or 12 strips?
 
 Get sound playing in browser so you can actually tell if it's a satisfying pattern
 
