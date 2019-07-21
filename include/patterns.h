@@ -59,7 +59,21 @@ void addressToCartesianPoint(size_t address, float& x_cart, float& y_cart, float
     z_cart = y * 5.0/50.0;
 }
 
-// This will also take in the frequency information as well as any other inputs/state (ie button press changes state)
+/**
+ * A test pattern to see ticks and sim working.
+ */
+Color8bit TestPattern(size_t address, ControllerState state, int16_t* freq) {
+    int r = uint8_t(address + state.tick + 130) % 256;
+    int g = uint8_t(address + state.tick + 10) % 256;
+    int b = uint8_t(address + state.tick + 70) % 256;
+    return Color8bit(r,g,b);
+}
+
+// This will also take in the frequency information as well as any other inputs/state 
+// (ie button press changes state)
+// The main color function, takes in:
+//    - the address of the LED
+//    - the controller state
 Color8bit getGoalsColorPortable(size_t address, ControllerState state, int16_t* freq) {
     normalize255(freq);
     if (state.music_on) {

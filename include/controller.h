@@ -12,7 +12,6 @@ const int numActiveAddresses = ledsPerStrip * 7;
 #define GET_COLOR getLinesColorPortable
 #endif
 
-
 #ifndef RECORD
 #include "patterns.h"
 #include <OctoWS2811.h>
