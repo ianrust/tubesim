@@ -81,15 +81,15 @@ Color8bit getGoalsColorPortable(size_t address, ControllerState state, int16_t* 
         float x_cart, y_cart, z_cart;
         addressToCartesianPoint(address%300, x_cart, y_cart, z_cart);
         addressToImageIndex(address%300, x, y);
-        size_t offset_x = (state.tick / 8) % organic_width;
+        size_t offset_x = (state.tick / 8) % hair_width;
 //        size_t offset_y = (state.tick / 3) % 30;
-        size_t rgb_start = (y * organic_width + x + offset_x) * 3;
+        size_t rgb_start = (y * hair_width + x + offset_x) * 3;
         float brightness = float(organic[rgb_start] + organic[rgb_start+1] + organic[rgb_start+2]) / (3.0 * 255.0);
 
         int grad_level = z_cart * 255 / 5;
 
-        return Color8bit(int(grad_level), int((255-grad_level)*brightness), int((1.0-brightness)*255));
-//        return Color8bit(pastel[rgb_start], pastel[rgb_start+1], pastel[rgb_start+2]);
+//        return Color8bit(int(grad_level), int((255-grad_level)*brightness), int((1.0-brightness)*255));
+        return Color8bit(hair[rgb_start], hair[rgb_start+1], hair[rgb_start+2]);
     }
 }
 
