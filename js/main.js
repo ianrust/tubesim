@@ -11,10 +11,12 @@ var Module = {
         initializeButtons(goals);
 
         camera.rotation.x = Math.PI / 4.0;
-        camera.position.z = 13;
         camera.position.y = -13;
+        camera.position.z = 13;
 
         var renderer = new THREE.WebGLRenderer();
+        var controls = new THREE.OrbitControls( camera, renderer.domElement );
+
         renderer.setSize(window.innerWidth, window.innerHeight);
         document.body.appendChild(renderer.domElement);
         container = document.getElementById('container');
