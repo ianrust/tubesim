@@ -3,7 +3,7 @@ from PIL import Image
 
 if __name__ == "__main__":
     fn = sys.argv[1]
-    fn_img = fn + ".png"
+    fn_img = fn + ".jpg"
     fn_code = fn + ".h"
     with open(fn_code, "w+") as code:
 
