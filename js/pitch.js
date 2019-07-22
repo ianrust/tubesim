@@ -1,6 +1,6 @@
 class GoalController {
     constructor(scene, getColor, song, stateClass) {
-        this.numStrips = 12;
+        this.numStrips = 6;
         this.ledsPerStrip = 50;
         this.goalPosts = [
             new Tube(-10, -2.5, 0.0, this.numStrips, this.ledsPerStrip, 5.0, 0.08),
