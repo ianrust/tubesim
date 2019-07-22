@@ -21,9 +21,9 @@ int16_t freq_out[7];
 uint8_t freq_amp;
 
 // filtered variables
-uint64_t last_spectrum_read_micros = 0;
-uint64_t spectrum_read_period_micros = 1500;
-uint64_t current_micros;
+uint32_t last_spectrum_read_micros = 0;
+uint32_t spectrum_read_period_micros = 1500;
+uint32_t current_micros;
 
 
 void spectrumPlot() {

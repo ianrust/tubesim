@@ -11,7 +11,7 @@ public:
     bool goal_left = false;
     bool goal_right = false;
     bool music_on = false;
-    uint16_t tick = 0;
+    uint32_t tick = 0;
     ControllerState(){};
 
     // Sim interface
@@ -38,15 +38,15 @@ public:
         updateOutputState();
     }
 private:
-    uint16_t last_tick_left;
-    uint16_t last_tick_right;
-    uint16_t goal_period = 60;
+    uint32_t last_tick_left;
+    uint32_t last_tick_right;
+    uint32_t goal_period = 60;
 };
 
 //assumes all LEDs are in 1 group for each pole
 void addressToImageIndex(size_t address, size_t& x, size_t& y) {
-    y = address % 50;
-    x = address / 50;
+    y = address % 45;
+    x = address / 45;
     if (x % 2 == 0) {
         y = 50 - y;
     }
@@ -56,7 +56,7 @@ void addressToImageIndex(size_t address, size_t& x, size_t& y) {
 void addressToCartesianPoint(size_t address, float& x_cart, float& y_cart, float& z_cart) {
     size_t x, y;
     addressToImageIndex(address, x, y);
-    z_cart = y * 5.0/50.0;
+    z_cart = y * 5.0/45.0;
 }
 
 /**
@@ -82,7 +82,7 @@ Color8bit getGoalsColorPortable(size_t address, ControllerState state, int16_t* 
         } else {
             return Color8bit(int(freq[0]*2*(address % 300) / 8),
                              int((freq[1] + freq[2] + freq[3] + freq[4])/4*(address % 100)/16),
-                             int(freq[5]*(address % 50)));
+                             int(freq[5]*(address % 45)));
         }
     } else {
         // only effect left/right adresses
