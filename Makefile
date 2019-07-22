@@ -1,5 +1,5 @@
 source:
-	source /home/calvin/dev/src/github.com/emscripten-core/emsdk/emsdk_env.sh
+	source ~/emsdk/emsdk_env.sh
 
 js:
 	emcc --bind include/js_patterns.cpp -o js/patterns.js

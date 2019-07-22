@@ -44,11 +44,12 @@ private:
 };
 
 //assumes all LEDs are in 1 group for each pole
+//removes last 5 address on each shortened strip
 void addressToImageIndex(size_t address, size_t& x, size_t& y) {
     y = address % 45;
     x = address / 45;
     if (x % 2 == 0) {
-        y = 50 - y;
+        y = 45 - y;
     }
 }
 
