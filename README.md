@@ -9,6 +9,10 @@
 # How to Run
 
 ## Javascript
+`pip install image` 
+
+[platform.io](https://platformio.org/) (optional, required for programming board)
+
 
 The js simulation is cross-compiled using emscripten to wasm. You can run it using
 a python webserver using the following commands.

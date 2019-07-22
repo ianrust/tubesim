@@ -13,7 +13,7 @@ public:
     bool music_on = false;
     uint16_t tick = 0;
     ControllerState(){};
-    
+
     // Sim interface
     // catches the edges but modifies no output state
     void updateEvent(bool button_left, bool button_right) {
@@ -93,17 +93,19 @@ Color8bit getGoalsColorPortable(size_t address, ControllerState state, int16_t* 
         }
         size_t x, y;
         float x_cart, y_cart, z_cart;
-        addressToCartesianPoint(address%300, x_cart, y_cart, z_cart);
-        addressToImageIndex(address%300, x, y);
-        size_t offset_x = (state.tick / 8) % hair_width;
+        addressToCartesianPoint(address % 300, x_cart, y_cart, z_cart);
+        addressToImageIndex(address % 300, x, y);
+        // bigger goes slower for 8
+        size_t offset_x = (state.tick / 8) % pixel_triangles_width;
 //        size_t offset_y = (state.tick / 3) % 30;
-        size_t rgb_start = (y * hair_width + x + offset_x) * 3;
+        // reverse direction with minus offset or + offset
+        size_t rgb_start = (y * pixel_triangles_width + x - offset_x) * 3;
         float brightness = float(organic[rgb_start] + organic[rgb_start+1] + organic[rgb_start+2]) / (3.0 * 255.0);
 
         int grad_level = z_cart * 255 / 5;
 
 //        return Color8bit(int(grad_level), int((255-grad_level)*brightness), int((1.0-brightness)*255));
-        return Color8bit(hair[rgb_start], hair[rgb_start+1], hair[rgb_start+2]);
+        return Color8bit(pixel_triangles[rgb_start], pixel_triangles[rgb_start+1], pixel_triangles[rgb_start+2]);
     }
 }
 
