@@ -40,7 +40,7 @@
             let rotaryIndex = Math.floor(i / linearSections);
             let up = (rotaryIndex % 2 === 0 && rotaryIndex < rotarySectionsAdjusted/2) ||
                         (rotaryIndex % 2 !== 0 && rotaryIndex >= rotarySectionsAdjusted/2);
-            let heightIndex = up ? i % linearSections : (linearSections - i % linearSections) ;
+            let heightIndex = up ? i % linearSections : ((linearSections-1) - i % linearSections) ;
             this.twoGroupMap.push(heightIndex*rotarySections + rotaryIndex)
         }
 
@@ -49,7 +49,7 @@
         for (let i = 0; i < (linearSections * rotarySections); i++) {
             let rotaryIndex = Math.floor(i / linearSections);
             let up = rotaryIndex % 2 === 0;
-            let heightIndex = up ? i % linearSections : (linearSections - i % linearSections) ;
+            let heightIndex = up ? i % linearSections : ((linearSections-1) - i % linearSections) ;
             this.oneGroupMap.push(heightIndex*rotarySections + rotaryIndex)
         }
 

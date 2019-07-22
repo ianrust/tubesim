@@ -45,19 +45,41 @@ private:
 
 //assumes all LEDs are in 1 group for each pole
 //removes last 5 address on each shortened strip
-void addressToImageIndex(size_t address, size_t& x, size_t& y) {
-    y = address % 45;
-    x = address / 45;
+void addressToImageIndex(size_t address, size_t& x, size_t& y, bool& valid) {
+    size_t cropped_address = address % 300;
+    if (cropped_address < 45) {
+        cropped_address = cropped_address;
+    } else if (cropped_address < 55) {
+        valid = false;
+        return;
+    } else if (cropped_address < 145) {
+        cropped_address -= 10;
+    } else if (cropped_address < 155) {
+        valid = false;
+        return;
+    } else if (cropped_address < 245) {
+        cropped_address -= 20;
+    } else if (cropped_address < 255) {
+        valid = false;
+        return;
+    } else {
+        cropped_address -= 30;
+    }
+
+    valid = true;
+    y = cropped_address % 45;
+    x = cropped_address / 45;
     if (x % 2 == 0) {
-        y = 45 - y;
+        y = 44 - y;
     }
 }
 
 //assumes all LEDs are in 1 group for each pole, 12 strips
 void addressToCartesianPoint(size_t address, float& x_cart, float& y_cart, float& z_cart) {
     size_t x, y;
-    addressToImageIndex(address, x, y);
-    z_cart = y * 5.0/45.0;
+    bool valid;
+    addressToImageIndex(address, x, y, valid);
+    z_cart = y * 4.5/45.0;
 }
 
 /**
@@ -76,6 +98,12 @@ Color8bit TestPattern(size_t address, ControllerState state, int16_t* freq) {
 //    - the address of the LED
 //    - the controller state
 Color8bit getGoalsColorPortable(size_t address, ControllerState state, int16_t* freq) {
+    size_t x, y;
+    bool valid;
+    addressToImageIndex(address, x, y, valid);
+    if (!valid) {
+        return Color8bit(0, 0, 0);
+    }
     normalize255(freq);
     if (state.music_on) {
         if (isClapping(freq)) {
@@ -92,21 +120,23 @@ Color8bit getGoalsColorPortable(size_t address, ControllerState state, int16_t* 
         } else if (address <= 1200 && state.goal_left) {
             return Color8bit(uint8_t(255), uint8_t(0), organic[state.tick % organic_len]);
         }
-        size_t x, y;
-        float x_cart, y_cart, z_cart;
-        addressToCartesianPoint(address % 300, x_cart, y_cart, z_cart);
-        addressToImageIndex(address % 300, x, y);
-        // bigger goes slower for 8
-        size_t offset_x = (state.tick / 8) % pixel_triangles_width;
-//        size_t offset_y = (state.tick / 3) % 30;
-        // reverse direction with minus offset or + offset
-        size_t rgb_start = (y * pixel_triangles_width + x - offset_x) * 3;
-        float brightness = float(organic[rgb_start] + organic[rgb_start+1] + organic[rgb_start+2]) / (3.0 * 255.0);
 
-        int grad_level = z_cart * 255 / 5;
-
-//        return Color8bit(int(grad_level), int((255-grad_level)*brightness), int((1.0-brightness)*255));
+        // pixels_triangle block
+        // bigger goes slower for 12
+        size_t offset_x = (state.tick / 12) % pixel_triangles_width;
+        // reverse direction by inverting offset_x:
+        offset_x = pixel_triangles_width - 1 - offset_x;
+        size_t rgb_start = (y * pixel_triangles_width + (x + offset_x)) * 3;
         return Color8bit(pixel_triangles[rgb_start], pixel_triangles[rgb_start+1], pixel_triangles[rgb_start+2]);
+
+//        // Organic block
+//        size_t offset_x = (state.tick / 12) % organic_width;
+//        size_t rgb_start = (y * organic_width + (x + offset_x)) * 3;
+//        float x_cart, y_cart, z_cart;
+//        addressToCartesianPoint(address, x_cart, y_cart, z_cart);
+//        int grad_level = z_cart * 255 / 5;
+//        float brightness = float(organic[rgb_start] + organic[rgb_start+1] + organic[rgb_start+2]) / (3.0 * 255.0);
+//        return Color8bit(int(grad_level), int((255-grad_level)*brightness), int((1.0-brightness)*255));
     }
 }
 

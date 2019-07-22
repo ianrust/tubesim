@@ -1,12 +1,12 @@
 class GoalController {
     constructor(scene, getColor, song, stateClass) {
-        this.numStrips = 6;
-        this.ledsPerStrip = 45;
+        this.numStrips = 12;
+        this.ledsPerStrip = 50;
         this.goalPosts = [
-            new Tube(-10, -2.5, 0.0, this.numStrips, this.ledsPerStrip, 4.5, 0.08),
-            new Tube(-10, 2.5, 0.0, this.numStrips, this.ledsPerStrip, 4.5, 0.08),
-            new Tube(10, 2.5, 0.0, this.numStrips, this.ledsPerStrip, 4.5, 0.08),
-            new Tube(10, -2.5, 0.0, this.numStrips, this.ledsPerStrip, 4.5, 0.08)
+            new Tube(-10, -2.5, 0.0, this.numStrips, this.ledsPerStrip, 5.0, 0.08),
+            new Tube(-10, 2.5, 0.0, this.numStrips, this.ledsPerStrip, 5.0, 0.08),
+            new Tube(10, 2.5, 0.0, this.numStrips, this.ledsPerStrip, 5.0, 0.08),
+            new Tube(10, -2.5, 0.0, this.numStrips, this.ledsPerStrip, 5.0, 0.08)
         ];
         this.goalPosts.forEach((item, index) => {
             scene.add(item.mesh);

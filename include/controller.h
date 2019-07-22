@@ -49,7 +49,7 @@ void loop() {
   for (ledIndex = 0; ledIndex < numActiveAddresses ; ledIndex++) {
     readFrequenciesTimed();
     color = GET_COLOR(ledIndex, state, freq_out);
-    leds.setPixel(ledIndex, color.r, color.g, color.b);
+    leds.setPixel(ledIndex, color.r, color.b, color.g);
   }
   leds.show();
 
