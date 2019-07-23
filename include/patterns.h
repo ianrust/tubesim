@@ -46,31 +46,29 @@ private:
 //assumes all LEDs are in 1 group for each pole
 //removes last 5 address on each shortened strip
 void addressToImageIndex(size_t address, size_t& x, size_t& y, bool& valid) {
-    size_t cropped_address = address % 300;
-    if (cropped_address < 45) {
-        cropped_address = cropped_address;
-    } else if (cropped_address < 55) {
-        valid = false;
-        return;
-    } else if (cropped_address < 145) {
-        cropped_address -= 10;
-    } else if (cropped_address < 155) {
-        valid = false;
-        return;
-    } else if (cropped_address < 245) {
-        cropped_address -= 20;
-    } else if (cropped_address < 255) {
-        valid = false;
-        return;
-    } else {
-        cropped_address -= 30;
+    size_t cropped_address = address % 600;
+    size_t gap = 0;
+    size_t low = 45;
+    size_t last_low = 0;
+    for (; (low < 600); low+=100) {
+        if (cropped_address < low) {
+            break;
+        } else if (cropped_address < (low+10)) {
+            valid = false;
+            return;
+        }
+        gap+=10;
+        last_low = low; 
     }
 
+    cropped_address -= gap;
+
     valid = true;
-    y = cropped_address % 45;
-    x = cropped_address / 45;
+    x = (address % 600) / 50;
     if (x % 2 == 0) {
-        y = 44 - y;
+        y = (cropped_address % 45);
+    } else {
+        y = 44 - (cropped_address % 45);
     }
 }
 

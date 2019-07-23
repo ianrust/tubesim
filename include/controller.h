@@ -2,8 +2,8 @@
 #include "audio.h"
 
 #ifdef GOALS
-const int ledsPerStrip = 300;
-const int numActiveAddresses = ledsPerStrip * 4;
+const int ledsPerStrip = 700;
+const int numActiveAddresses = ledsPerStrip * 6;
 #define GET_COLOR getGoalsColorPortable
 #endif
 #ifdef LINES
