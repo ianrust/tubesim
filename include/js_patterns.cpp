@@ -15,7 +15,6 @@ struct ColorNormalized {
     }
 };
 
-
 ColorNormalized getGoalsColor(int address, ControllerState state, int16_t freq0,
                                                                   int16_t freq1,
                                                                   int16_t freq2,
@@ -34,8 +33,27 @@ ColorNormalized getGoalsColor(int address, ControllerState state, int16_t freq0,
     return ColorNormalized(getGoalsColorPortable(address, state, freq_input));
 }
 
+ColorNormalized getLinesColor(int address, ControllerState state, int16_t freq0,
+                                                                  int16_t freq1,
+                                                                  int16_t freq2,
+                                                                  int16_t freq3,
+                                                                  int16_t freq4,
+                                                                  int16_t freq5,
+                                                                  int16_t freq6) {
+    int16_t freq_input[7];
+    freq_input[0] = freq0; 
+    freq_input[1] = freq1; 
+    freq_input[2] = freq2; 
+    freq_input[3] = freq3; 
+    freq_input[4] = freq4; 
+    freq_input[5] = freq5; 
+    freq_input[6] = freq6; 
+    return ColorNormalized(getLinesColorPortable(address, state, freq_input));
+}
+
 EMSCRIPTEN_BINDINGS(my_module) {
     emscripten::function("getGoalsColor", &getGoalsColor);
+    emscripten::function("getLinesColor", &getLinesColor);
     emscripten::class_<ControllerState>("ControllerState")
         .constructor<>()
         .property("tick", &ControllerState::tick)

@@ -5,7 +5,7 @@ var Module = {
         var scene = new THREE.Scene();
 
         var camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-        var goals = new GoalController(scene, Module.getGoalsColor, song, Module.ControllerState);
+        var goals = new GoalController(scene, Module.getGoalsColor, Module.getLinesColor, song, Module.ControllerState);
 
 
         initializeButtons(goals);

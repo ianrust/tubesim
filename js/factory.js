@@ -96,3 +96,92 @@
         this.mesh.geometry.attributes.color.needsUpdate = true;
     }
 }
+
+class Line {
+    constructor(side, numLeds, thickness) {
+        this.numLeds = numLeds;
+        let geometry = new THREE.BufferGeometry();
+
+        let indices = [];
+        let vertices = [];
+        let normals = [];
+        let colors = [];
+
+        let flip = side ? 1 : -1;
+
+        for ( var sectionIndex = 0; sectionIndex <= this.numLeds; sectionIndex ++ ) {
+            for ( var lateralIndex = 0; lateralIndex <= 2; lateralIndex ++) {
+                if (sectionIndex < 200) {
+                    vertices.push(flip*sectionIndex*(5.0/100.0), (7.5 + (lateralIndex - 1) * thickness/2), 0);
+                } else if (sectionIndex < 500) {
+                    vertices.push(flip*(10 + (lateralIndex - 1) * thickness/2), (7.5-(sectionIndex-200)*(5.0/100.0)), 0);
+                } else {
+                    vertices.push(flip*(700-sectionIndex)*(5.0/100.0), (-7.5 - (lateralIndex - 1) * thickness/2), 0);
+                }
+                normals.push(0, 0, 1.0);
+                colors.push(0.5, 0.5, 0.5);
+            }
+        }
+
+        for ( var sectionIndex = 0; sectionIndex < this.numLeds; sectionIndex ++ ) {
+            for ( var lateralIndex = 0; lateralIndex < 2; lateralIndex ++) {
+                let bottomLeftIndex = sectionIndex * 3 + lateralIndex;
+                let bottomRightIndex = sectionIndex * 3 + lateralIndex + 1;
+                let topLeftIndex = (sectionIndex+1) * 3 + lateralIndex;
+                let topRightIndex = (sectionIndex+1) * 3 + lateralIndex + 1;
+                if (side) {
+                    indices.push(bottomRightIndex, bottomLeftIndex, topLeftIndex);
+                    indices.push(topRightIndex, bottomRightIndex, topLeftIndex);
+                } else {
+                    indices.push(bottomLeftIndex, bottomRightIndex, topLeftIndex);
+                    indices.push(bottomRightIndex, topRightIndex, topLeftIndex);
+                }
+            }
+        }
+
+        geometry.setIndex( indices );
+        geometry.addAttribute( 'position', new THREE.Float32BufferAttribute( vertices, 3 ) );
+        geometry.addAttribute( 'normal', new THREE.Float32BufferAttribute( normals, 3 ) );
+        let colorAttribute = new THREE.Float32BufferAttribute( colors, 3 );
+        colorAttribute.setDynamic(true);
+        geometry.addAttribute( 'color', colorAttribute);
+
+        let material = new THREE.ShaderMaterial({
+            vertexShader: `
+                attribute vec3 color;
+                varying vec3 colorShader;
+                varying vec3 pos;
+
+                void main() {
+                    colorShader = color;
+                    pos = position;
+                    gl_Position = projectionMatrix * modelViewMatrix * vec4(position,1.0);
+                }
+            `,
+            fragmentShader: `
+                varying vec3 colorShader;
+                varying vec3 pos;
+                
+                void main() {
+                    gl_FragColor = vec4(colorShader, 1.0);
+                }
+            `,    
+        });
+        this.mesh = new THREE.Mesh( geometry, material );
+        this.mesh.position.set( 0, 0, 0 );
+    }
+
+    // Set all 3 in parallel
+    setLEDValueMapped(i, r, g, b) {
+        this.setLEDValue(i*3, r, g, b);
+        this.setLEDValue(i*3+1, r, g, b);
+        this.setLEDValue(i*3+2, r, g, b);
+    }
+
+    setLEDValue(i, r, g, b) {
+        this.mesh.geometry.attributes.color.set([r], i*3);
+        this.mesh.geometry.attributes.color.set([g], i*3 + 1);
+        this.mesh.geometry.attributes.color.set([b], i*3 + 2);
+        this.mesh.geometry.attributes.color.needsUpdate = true;
+    }
+}
