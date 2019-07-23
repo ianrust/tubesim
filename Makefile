@@ -1,5 +1,5 @@
 js:
-	. ~/emsdk/emsdk_env.sh && emcc --bind include/js_patterns.cpp -o js/patterns.js
+	. ~/emsdk/emsdk_env.sh && emcc --bind include/js_patterns.cpp -o js/patterns.js  -s "BINARYEN_TRAP_MODE='clamp'"
 
 website:
 	python3 -m http.server
