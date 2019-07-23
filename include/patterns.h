@@ -28,8 +28,8 @@ public:
         }
     }
     void updateOutputState() {
-        goal_left = (tick - last_tick_left) < goal_period;
-        goal_right = (tick - last_tick_right) < goal_period;
+        goal_left = (tick - last_tick_left) < goal_period && last_tick_left != 0;
+        goal_right = (tick - last_tick_right) < goal_period && last_tick_right != 0;
         tick++;
     }
 
@@ -40,8 +40,8 @@ public:
         updateOutputState();
     }
 private:
-    uint32_t last_tick_left;
-    uint32_t last_tick_right;
+    uint32_t last_tick_left = 0;
+    uint32_t last_tick_right = 0;
     uint32_t goal_period = 60;
 };
 
