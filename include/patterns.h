@@ -109,7 +109,7 @@ void addressToCartesianPoint(size_t address, float& x_cart, float& y_cart, float
         size_t progressIndex = address % 700;
         int side = (goal_index == 4) ? 1 : -1;
         if (progressIndex < 200) {
-            x_cart = side * progressIndex * 0.05;
+            x_cart = side * float(progressIndex) * 0.05;
             y_cart = 7.5;
         } else if (progressIndex < 500) {
             x_cart = side*10; 
@@ -197,14 +197,8 @@ Color8bit getGoalsColorPortable(size_t address, ControllerState state, int16_t* 
 Color8bit getLinesColorPortable(int address, ControllerState state, int16_t* freq) {
     float x_cart, y_cart, z_cart;
     addressToCartesianPoint(address, x_cart, y_cart, z_cart);
-    // int r = 255.0*fabs(x_cart)/10.0;
-    int r;
-    if (x_cart > 0) {
-        r = 255.0*x_cart/10.0;
-    } else {
-        r = -255.0*x_cart/10.0;
-    }
-    // int r = 255.0*fabs(y_cart)/7.5;
+    int r = int(255.0*fabs(y_cart +state.tick/3)/7.5) % 255;
+    int g = int(255.0*fabs(x_cart+state.tick/3)/10.0) % 255;
     int b = 255-r;
-    return Color8bit(r, 0, b);
+    return Color8bit(r, g, b);
 }
