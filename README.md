@@ -41,6 +41,8 @@ $ make upload // this will sync with the board
 
 - [ ] Get index -> spatial location working w/ a common definition with the Tube object since so much of that lives there. In the future this could be a config file?
 
+- [ ] Make test patterns for when we assemble on playa, probably on startup
+
 - [ ] Make animations smoother. We have the frame rate we just need to
 
 - [ ] Make addressing match wiring plan (2 goal posts on each ethernet port)

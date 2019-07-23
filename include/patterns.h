@@ -2,7 +2,6 @@
 
 #include <math.h>
 #include "spectrum_analysis.h"
-#include "gamma.h"
 #include "types.h"
 #include "../images/images.h"
 
@@ -157,7 +156,7 @@ Color8bit getGoalsColorPortable(size_t address, ControllerState state, int16_t* 
     } else {
         // only effect left/right adresses
         if (address > 1400 && state.goal_right) {
-            return Color8bit(uint8_t(255), uint8_t(0), organic[state.tick % organic_len]);
+            return Color8bit(uint8_t(255), uint8_t(0), tealmagenta[state.tick % tealmagenta_len]);
         } else if (address <= 1400 && state.goal_left) {
             return Color8bit(uint8_t(255), uint8_t(0), organic[state.tick % organic_len]);
         }
@@ -170,7 +169,7 @@ Color8bit getGoalsColorPortable(size_t address, ControllerState state, int16_t* 
         // pixels_triangle block
         size_t rgb_start = (((y+offset_y)%bubbles_height) * bubbles_width + (x + offset_x)%bubbles_width) * 3;
 
-        return Color8bit(gamma8[bubbles[rgb_start]], gamma8[bubbles[rgb_start+1]], gamma8[bubbles[rgb_start+2]]);
+        return Color8bit(bubbles[rgb_start], bubbles[rgb_start+1], bubbles[rgb_start+2]);
 
 //        // Organic block
 //        size_t offset_x = (state.tick / 12) % organic_width;
