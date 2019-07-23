@@ -121,11 +121,16 @@ Color8bit getGoalsColorPortable(size_t address, ControllerState state, int16_t* 
 
         // pixels_triangle block
         // bigger goes slower for 12
-        size_t offset_x = (state.tick / 12) % pixel_triangles_width;
+        size_t offset_x = (state.tick/10) % eyeball_width;
         // reverse direction by inverting offset_x:
-        offset_x = pixel_triangles_width - 1 - offset_x;
-        size_t rgb_start = (y * pixel_triangles_width + (x + offset_x)) * 3;
-        return Color8bit(pixel_triangles[rgb_start], pixel_triangles[rgb_start+1], pixel_triangles[rgb_start+2]);
+        offset_x = eyeball_width - 1 - offset_x;
+        size_t rgb_start = (((y+state.tick/3)%eyeball_height) * eyeball_width + (x + offset_x)%eyeball_width) * 3;
+
+        float total = eyeball[rgb_start]+eyeball[rgb_start+1]+eyeball[rgb_start+2];
+        float average = total/3;
+
+        return Color8bit(2*int((eyeball[rgb_start]-average/1.1)*255.0/total), 2*int((eyeball[rgb_start+1]-average/1.1)*255.0/total), 2*int((eyeball[rgb_start+2]-average/1.1)*255.0/total));
+//        return Color8bit(eyeball[rgb_start], eyeball[rgb_start+1], eyeball[rgb_start+2]);
 
 //        // Organic block
 //        size_t offset_x = (state.tick / 12) % organic_width;
