@@ -155,9 +155,9 @@ Color8bit getGoalsColorPortable(size_t address, ControllerState state, int16_t* 
         }
     } else {
         // only effect left/right adresses
-        if (address > 1200 && state.goal_right) {
+        if (address > 1400 && state.goal_right) {
             return Color8bit(uint8_t(255), uint8_t(0), organic[state.tick % organic_len]);
-        } else if (address <= 1200 && state.goal_left) {
+        } else if (address <= 1400 && state.goal_left) {
             return Color8bit(uint8_t(255), uint8_t(0), organic[state.tick % organic_len]);
         }
 
