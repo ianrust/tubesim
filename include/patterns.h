@@ -2,6 +2,7 @@
 
 #include <math.h>
 #include "spectrum_analysis.h"
+#include "mapping.h"
 #include "types.h"
 #include "../images/images.h"
 
@@ -44,90 +45,12 @@ private:
     uint32_t goal_period = 60;
 };
 
-//assumes all LEDs are in 1 group for each pole
-//removes last 5 address on each shortened strip
-void addressToImageIndex(size_t address, size_t& x, size_t& y, bool& valid) {
-    size_t cropped_address = address % 700;
-    size_t gap = 0;
-    size_t low = 45;
-    size_t last_low = 0;
-    for (; (low < 600); low+=100) {
-        if (cropped_address < low) {
-            break;
-        } else if (cropped_address < (low+10)) {
-            valid = false;
-            return;
-        }
-        gap+=10;
-        last_low = low; 
-    }
-
-    cropped_address -= gap;
-
-    valid = true;
-    x = (address % 600) / 50;
-    if (x % 2 == 0) {
-        y = (cropped_address % 45);
-    } else {
-        y = 44 - (cropped_address % 45);
-    }
-}
-
-//assumes all LEDs are in 1 group for each pole, 12 strips
-// TODO add position of pixel around the pole
-void addressToCartesianPoint(size_t address, float& x_cart, float& y_cart, float& z_cart) {
-    size_t x, y;
-    bool valid;
-    // first 4 addresses are goals.
-    bool goal = (address / 700) < 4;
-    if (goal) {
-        addressToImageIndex(address, x, y, valid);
-    }
-    size_t goal_index = address / 700;
-    // for goals
-    if (goal) {
-        // from pitch.js
-            // new Tube(-10, -2.5, 0.0, this.numStrips, this.ledsPerStrip, 5.0, 0.08),
-            // new Tube(-10, 2.5, 0.0, this.numStrips, this.ledsPerStrip, 5.0, 0.08),
-            // new Tube(10, 2.5, 0.0, this.numStrips, this.ledsPerStrip, 5.0, 0.08),
-            // new Tube(10, -2.5, 0.0, this.numStrips, this.ledsPerStrip, 5.0, 0.08),
-        if (goal_index == 0) {
-            x_cart = -10;
-            y_cart = -2.5;
-        } else if (goal_index == 1) {
-            x_cart = -10;
-            y_cart = 2.5;
-        } else if (goal_index == 2) {
-            x_cart = 10;
-            y_cart = 2.5;
-        } else if (goal_index == 3) {
-            x_cart = 10;
-            y_cart = -2.5;
-        }
-        z_cart = y * 4.5/45.0;
-    } else { //for lines
-        size_t progressIndex = address % 700;
-        int side = (goal_index == 4) ? 1 : -1;
-        if (progressIndex < 200) {
-            x_cart = side * float(progressIndex) * 0.05;
-            y_cart = 7.5;
-        } else if (progressIndex < 500) {
-            x_cart = side*10; 
-            y_cart = 7.5 - (progressIndex+1 - 200) * 0.05; 
-        } else {
-            x_cart = -side*(10 - (progressIndex+1 - 500) * 0.05); 
-            y_cart = -7.5; 
-        }
-        z_cart = 0;
-    }
-}
-
 /**
  * A test pattern to see ticks and sim working.
  */
 Color8bit TestPattern(size_t address, ControllerState state, int16_t* freq) {
     int r = uint8_t(address + state.tick + 130) % 256;
-    int g = uint8_t(address + state.tick + 10) % 256;
+    int g = uint8_t(address + state.tick + (mapping_config.pitch_length_half)) % 256;
     int b = uint8_t(address + state.tick + 70) % 256;
     return Color8bit(r,g,b);
 }
@@ -155,21 +78,21 @@ Color8bit getGoalsColorPortable(size_t address, ControllerState state, int16_t* 
         }
     } else {
         // only effect left/right adresses
-        if (address > 1400 && state.goal_right) {
+        if (getSideBool(address) && state.goal_right) {
             return Color8bit(uint8_t(255), uint8_t(0), tealmagenta[state.tick % tealmagenta_len]);
-        } else if (address <= 1400 && state.goal_left) {
+        } else if (!getSideBool(address) && state.goal_left) {
             return Color8bit(uint8_t(255), uint8_t(0), organic[state.tick % organic_len]);
         }
 
-        size_t offset_x = (state.tick/10);
+        size_t offset_x = (state.tick/(mapping_config.pitch_length_half));
         size_t offset_y = (state.tick/2);
         // reverse direction by inverting offset_x:
-        offset_x = bubbles_width - 1 - offset_x;
+        offset_x = pixel_triangles_width - 1 - offset_x;
 
         // pixels_triangle block
-        size_t rgb_start = (((y+offset_y)%bubbles_height) * bubbles_width + (x + offset_x)%bubbles_width) * 3;
+        size_t rgb_start = (((y+0*offset_y)%pixel_triangles_height) * pixel_triangles_width + (x + offset_x)%pixel_triangles_width) * 3;
 
-        return Color8bit(bubbles[rgb_start], bubbles[rgb_start+1], bubbles[rgb_start+2]);
+        return Color8bit(pixel_triangles[rgb_start], pixel_triangles[rgb_start+1], pixel_triangles[rgb_start+2]);
 
 //        // Organic block
 //        size_t offset_x = (state.tick / 12) % organic_width;
@@ -181,12 +104,12 @@ Color8bit getGoalsColorPortable(size_t address, ControllerState state, int16_t* 
 //        return Color8bit(int(grad_level), int((255-grad_level)*brightness), int((1.0-brightness)*255));
 
 
-        // gradient block
-        float x_cart, y_cart, z_cart;
-        addressToCartesianPoint(address, x_cart, y_cart, z_cart);
-        int g = int(255.0*(z_cart)/5.0);
-        int r = 255-g;
-        return Color8bit(r, g, 0);
+        // // gradient block
+        // float x_cart, y_cart, z_cart;
+        // addressToCartesianPoint(address, x_cart, y_cart, z_cart);
+        // int g = int(255.0*(z_cart)/5.0);
+        // int r = 255-g;
+        // return Color8bit(r, g, 0);
     }
 }
 
@@ -194,8 +117,8 @@ Color8bit getGoalsColorPortable(size_t address, ControllerState state, int16_t* 
 Color8bit getLinesColorPortable(int address, ControllerState state, int16_t* freq) {
     float x_cart, y_cart, z_cart;
     addressToCartesianPoint(address, x_cart, y_cart, z_cart);
-    int r = int(255.0*fabs(y_cart +state.tick/3)/7.5) % 255;
-    int g = int(255.0*fabs(x_cart+state.tick/3)/10.0) % 255;
+    int r = int(255.0*fabs(y_cart +state.tick/3)/(mapping_config.pitch_width_half)) % 255;
+    int g = int(255.0*fabs(x_cart+state.tick/3)/(mapping_config.pitch_length_half)) % 255;
     int b = 255-r;
     return Color8bit(r, g, b);
 }

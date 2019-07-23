@@ -2,14 +2,6 @@
 #include "audio.h"
 
 #ifdef GOALS
-const int ledsPerStrip = 700;
-const int numActiveAddresses = ledsPerStrip * 6;
-#define GET_COLOR getGoalsColorPortable
-#endif
-#ifdef LINES
-const int ledsPerStrip = 600;
-const int numActiveAddresses = ledsPerStrip * 7;
-#define GET_COLOR getLinesColorPortable
 #endif
 
 #ifndef RECORD
@@ -21,6 +13,9 @@ const int numActiveAddresses = ledsPerStrip * 7;
 
 int ledIndex = 0;
 Color8bit color;
+
+const int ledsPerStrip = 700;
+const int numActiveAddresses = ledsPerStrip * 6;
 
 DMAMEM int displayMemory[ledsPerStrip*6];
 int drawingMemory[ledsPerStrip*6];
@@ -48,7 +43,7 @@ void loop() {
   state.update(!digitalRead(PIN_LEFT), !digitalRead(PIN_RIGHT), freq_out);
   for (ledIndex = 0; ledIndex < numActiveAddresses ; ledIndex++) {
     readFrequenciesTimed();
-    color = GET_COLOR(ledIndex, state, freq_out);
+    color = getGoalsColorPortable(ledIndex, state, freq_out);
     leds.setPixel(ledIndex, color.r, color.b, color.g);
   }
   leds.show();
