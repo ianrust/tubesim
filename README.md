@@ -36,20 +36,17 @@ $ make upload // this will sync with the board
 
 # TODOs
 
-- [ ] Make sidelines by either expanding Tube to have a special "1-sided" mode or it's own class
-    they need to have way different indexing (start at the center) and have the ability for angles
-
-- [ ] Get index -> spatial location working w/ a common definition with the Tube object since so much of that lives there. In the future this could be a config file?
+- [ ] Make addressing match wiring plan (2 goal posts on each ethernet port). Cleanup addressing so less hardcoding ie via a config
 
 - [ ] Make test patterns for when we assemble on playa, probably on startup
 
-- [ ] Make animations smoother. We have the frame rate we just need to
-
-- [ ] Make addressing match wiring plan (2 goal posts on each ethernet port)
+- [ ] Make animations smoother. We have the frame rate
 
 - [ ] Get sound playing in browser so you can actually tell if it's a satisfying pattern
 
 - [ ] Make sure timing matches in sim (specifically the "tick" variable)
+
+- [ ] Have the ability for angles on goal tubes
 
 - [ ] I'm not that impressed with the performance of the spectrum chip. We should really be able to do an fft, but that is hard.
 
