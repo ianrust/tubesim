@@ -20,7 +20,7 @@ Color8bit TestPattern(size_t address, ControllerState state, int16_t* freq) {
 
 Color8bit testLightHausPattern(size_t address, ControllerState state, int16_t* freq) {
     float ratio;
-    mapping_config.addressToLighthausParameter(address, 1, 0.1, state.tick, ratio);
+    mapping_config.addressToLighthausParameter(address, 1.5, 0.1, state.tick, ratio);
     return interpolate(Color8bit(0, 56, 255), Color8bit(5, 255, 0), ratio);
 }
 

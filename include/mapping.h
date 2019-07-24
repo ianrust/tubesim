@@ -145,7 +145,7 @@ public:
 
     // num_wraps around the pole interpolated b/w 2 colors (parametrizes by ratio). wrapps on speed
     // which is in m/(offset index). offset is usually state.tick but you decide!
-    void addressToLighthausParameter(size_t address, uint8_t num_wraps, float speed, size_t offset, float& ratio) const {
+    void addressToLighthausParameter(size_t address, float num_wraps, float speed, size_t offset, float& ratio) const {
         size_t x_image, y_image;
         bool valid;
         float progress;
