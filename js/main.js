@@ -24,7 +24,7 @@ var Module = {
         container.appendChild(stats.dom);
 
         function animate() {
-            // goals.update();
+            goals.update();
 
             requestAnimationFrame( animate );
             renderer.render( scene, camera );

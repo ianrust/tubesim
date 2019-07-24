@@ -83,6 +83,8 @@ EMSCRIPTEN_BINDINGS(my_module) {
         .property("line_width", &MappingConfig::line_width)
         .function("getChannelType", &MappingConfig::getChannelType)
         .function("getPosition", &MappingConfig::getPosition)
+        .function("isGoal", &MappingConfig::isGoal)
+        .function("isLine", &MappingConfig::isLine)
         ;
     emscripten::class_<ControllerState>("ControllerState")
         .constructor<>()

@@ -67,7 +67,11 @@ public:
     }
 
     bool isGoal(size_t address) const {
-        return (address / leds_per_channel) < 4;
+        return channels[int(address / leds_per_channel)] == ChannelType::GOALPOST;
+    }
+
+    bool isLine(size_t address) const {
+        return channels[int(address / leds_per_channel)] == ChannelType::LINES;
     }
 
     // +x is true/positive
