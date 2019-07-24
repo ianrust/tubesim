@@ -36,13 +36,11 @@ $ make upload // this will sync with the board
 
 # TODOs
 
-- [ ] Make addressing match wiring plan (2 goal posts on each ethernet port). Cleanup addressing so less hardcoding ie via a config
-
-- [ ] Make test patterns for when we assemble on playa, probably on startup
+- [ ] Get sound playing in browser so you can actually tell if it's a satisfying pattern
 
 - [ ] Make animations smoother. We have the frame rate
 
-- [ ] Get sound playing in browser so you can actually tell if it's a satisfying pattern
+- [ ] Make test patterns for when we assemble on playa, probably on startup
 
 - [ ] Make sure timing matches in sim (specifically the "tick" variable)
 
@@ -58,3 +56,5 @@ $ make upload // this will sync with the board
 - [x] Test images on real tube - 6 or 12 strips? ANSWER - 12
 
 - [x] Make a colormap for each LED type in order to get truer colors - FIXED w/ gamma correction
+
+- [x] Make addressing match wiring plan (2 goal posts on each ethernet port). Cleanup addressing so less hardcoding ie via a config
