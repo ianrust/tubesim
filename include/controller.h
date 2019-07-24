@@ -16,7 +16,7 @@ int ledIndex = 0;
 Color8bit color;
 
 const int ledsPerStrip = 700;
-const int numActiveAddresses = ledsPerStrip * 6;
+const int numActiveAddresses = ledsPerStrip * 8;
 
 DMAMEM int displayMemory[ledsPerStrip*6];
 int drawingMemory[ledsPerStrip*6];
@@ -50,6 +50,9 @@ void loop() {
     } else if (mapping_config.isGoal(ledIndex)) {
       color = getGoalsColorPortable(ledIndex, state, freq_out);
       leds.setPixel(ledIndex, gamma8[color.r], gamma8[color.b], gamma8[color.g]);
+    } else {
+      // skip inactive addresses
+      ledIndex += mapping_config.leds_per_channel-1;
     }
   }
   leds.show();
