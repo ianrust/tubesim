@@ -51,7 +51,7 @@ public:
 
     // line settings
     float pixel_length = 0.05;
-    float line_width = 0.05;
+    float line_width = 0.1;
 
     MappingConfig() {
         goal_led_strip_length_cropped = goal_led_strip_length - num_goal_leds_excluded;
