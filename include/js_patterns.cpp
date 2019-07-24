@@ -52,8 +52,38 @@ ColorNormalized getLinesColor(int address, ControllerState state, int16_t freq0,
 }
 
 EMSCRIPTEN_BINDINGS(my_module) {
-    emscripten::function("getGoalsColor", &getGoalsColor);
-    emscripten::function("getLinesColor", &getLinesColor);
+    emscripten::function("getGoalsColor", &getGoalsColor)
+    ;
+    emscripten::function("getLinesColor", &getLinesColor)
+    ;
+    emscripten::enum_<ChannelType>("ChannelType")
+        .value("GOALPOST", ChannelType::GOALPOST)
+        .value("LINES", ChannelType::LINES)
+        .value("NOTCONNECTED", ChannelType::NOTCONNECTED)
+        ;
+    emscripten::class_<Position>("Position")
+        .constructor<>()
+        .property("x", &Position::x)
+        .property("y", &Position::y)
+        .property("z", &Position::z)
+        ;
+    emscripten::class_<MappingConfig>("MappingConfig")
+        .constructor<>()
+        .property("leds_per_channel", &MappingConfig::leds_per_channel)
+        .property("pitch_length", &MappingConfig::pitch_length)
+        .property("pitch_width", &MappingConfig::pitch_width)
+        .property("pitch_length_half", &MappingConfig::pitch_length_half)
+        .property("pitch_width_half", &MappingConfig::pitch_width_half)
+        .property("addresses_per_goal", &MappingConfig::addresses_per_goal)
+        .property("goal_led_strip_length", &MappingConfig::goal_led_strip_length)
+        .property("addresses_per_goal", &MappingConfig::addresses_per_goal)
+        .property("radius", &MappingConfig::radius)
+        .property("pixel_height", &MappingConfig::pixel_height)
+        .property("pixel_length", &MappingConfig::pixel_length)
+        .property("line_width", &MappingConfig::line_width)
+        .function("getChannelType", &MappingConfig::getChannelType)
+        .function("getPosition", &MappingConfig::getPosition)
+        ;
     emscripten::class_<ControllerState>("ControllerState")
         .constructor<>()
         .property("tick", &ControllerState::tick)
@@ -61,7 +91,8 @@ EMSCRIPTEN_BINDINGS(my_module) {
         .property("goal_right", &ControllerState::goal_right)
         .property("music_on", &ControllerState::music_on)
         .function("updateEvent", &ControllerState::updateEvent)
-        .function("updateOutputState", &ControllerState::updateOutputState);
+        .function("updateOutputState", &ControllerState::updateOutputState)
+        ;
     value_array<ColorNormalized>("ColorNormalized")
         .element(&ColorNormalized::r)
         .element(&ColorNormalized::g)

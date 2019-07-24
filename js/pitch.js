@@ -1,24 +1,20 @@
 class GoalController {
-    constructor(scene, getGoalsColor, getLinesColor, song, stateClass) {
-        this.numStrips = 12;
-        this.ledsPerStrip = 50;
-        this.maxPerWire = 700
-        this.goalPosts = [
-            new Tube(-10, -2.5, 0.0, this.numStrips, this.ledsPerStrip, 5.0, 0.08),
-            new Tube(-10, 2.5, 0.0, this.numStrips, this.ledsPerStrip, 5.0, 0.08),
-            new Tube(10, 2.5, 0.0, this.numStrips, this.ledsPerStrip, 5.0, 0.08),
-            new Tube(10, -2.5, 0.0, this.numStrips, this.ledsPerStrip, 5.0, 0.08),
-            new Line(true, this.maxPerWire, 0.05),
-            new Line(false, this.maxPerWire, 0.05)
-        ];
-        this.goalPosts.forEach((item, index) => {
-            scene.add(item.mesh);
-        });
-        this.totalLeds = this.maxPerWire * this.goalPosts.length;
-        this.getGoalsColor = getGoalsColor;
-        this.getLinesColor = getLinesColor;
+    constructor(scene, song) {
+        this.mapping_config = new Module.MappingConfig();
         this.song = song;
-        this.state = new stateClass();
+        this.state = new Module.ControllerState();
+
+        this.channels = []
+        for (let i = 0; i < 8; i++) {
+            let position = this.mapping_config.getPosition(i);
+            if (this.mapping_config.getChannelType(i).value === Module.ChannelType.GOALPOST.value) {
+                this.channels.push(new Tube(position, this.mapping_config));
+            } else if (this.mapping_config.getChannelType(i).value === Module.ChannelType.LINES.value) {
+                this.channels.push(new Line(position.x > 0, this.mapping_config));
+            }
+            scene.add(this.channels[this.channels.length-1].mesh)
+        }
+        this.totalLeds = this.maxPerWire * this.channels.length;
     }
 
     // Calls the getColor function from the goal posts for each pixel and then updates it
@@ -29,7 +25,7 @@ class GoalController {
         for (let i = 0; i < this.totalLeds; i++) {
             let color;
             if (Math.floor(i/(this.maxPerWire)) < 4) {
-                color = this.getGoalsColor(i, this.state, freq[0],
+                color = Module.getGoalsColor(i, this.state, freq[0],
                                                             freq[1],
                                                             freq[2],
                                                             freq[3],
@@ -37,7 +33,7 @@ class GoalController {
                                                             freq[5],
                                                             freq[6]);
             } else {
-                color = this.getLinesColor(i, this.state, freq[0],
+                color = Module.getLinesColor(i, this.state, freq[0],
                                                             freq[1],
                                                             freq[2],
                                                             freq[3],

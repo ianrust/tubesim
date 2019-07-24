@@ -10,9 +10,13 @@ struct Position {
     }
 };
 
-// enum CHANNEL_TYPE
+enum ChannelType {
+    GOALPOST = 0,
+    LINES = 1,
+    NOTCONNECTED = 2
+};
 
-class MappingConfing {
+class MappingConfig {
 public:
     // global settings
     size_t leds_per_channel = 700;
@@ -23,12 +27,18 @@ public:
     float pitch_width_half;
 
     // channel on the octo board
-    size_t goal_channels[4] = {0, 1, 4, 5};
-    Position goal_positions[4];
+    ChannelType channels[8] = {
+        ChannelType::GOALPOST,
+        ChannelType::GOALPOST,
+        ChannelType::LINES,
+        ChannelType::NOTCONNECTED,
+        ChannelType::GOALPOST,
+        ChannelType::GOALPOST,
+        ChannelType::LINES,
+        ChannelType::NOTCONNECTED
+    };
+    Position positions[8];
     
-    size_t line_channels[2] = {2, 6};
-
-
     // goal settings
     size_t goal_led_strip_length = 50;
     size_t num_goal_leds_excluded = 5;
@@ -36,108 +46,120 @@ public:
     size_t goal_led_strip_length_cropped;
     size_t addresses_per_goal = 600;
     float pixel_height = 0.1;
-    float goal_width_half = 7.5;
+    float goal_width_half = 2.5;
+    float radius = 0.1;
 
     // line settings
     float pixel_length = 0.05;
+    float line_width = 0.05;
 
-    MappingConfing() {
+    MappingConfig() {
         goal_led_strip_length_cropped = goal_led_strip_length - num_goal_leds_excluded;
         pitch_length_half = pitch_length/2;
         pitch_width_half = pitch_width/2;
         num_goal_leds_excluded_double = num_goal_leds_excluded*2;
-        goal_positions[0] = Position(-pitch_length_half, -pitch_width_half);
-        goal_positions[1] = Position(-pitch_length_half, pitch_width_half);
-        goal_positions[2] = Position(pitch_length_half, pitch_width_half);
-        goal_positions[3] = Position(pitch_length_half, -pitch_width_half);
+        positions[0] = Position(-pitch_length_half, -goal_width_half);
+        positions[1] = Position(-pitch_length_half, goal_width_half);
+        positions[2] = Position(1, 0); // line direction
+        positions[4] = Position(pitch_length_half, goal_width_half);
+        positions[5] = Position(pitch_length_half, -goal_width_half);
+        positions[6] = Position(-1, 0); // line direction
     }
+
+    bool isGoal(size_t address) const {
+        return (address / leds_per_channel) < 4;
+    }
+
+    // +x is true/positive
+    int getSide(size_t address) const {
+        return ((address / leds_per_channel) == 4) ? 1 : -1;
+    }
+
+    // +x is true/positive
+    bool getSideBool(size_t address) const {
+        return (address > (2*leds_per_channel));
+    }
+
+    ChannelType getChannelType(size_t channel) const {
+        return channels[channel];
+    }
+
+    Position getPosition(size_t channel) const {
+        return positions[channel];
+    }
+
+    //assumes all LEDs are in 1 group for each pole
+    //removes last 5 address on each shortened strip
+    void addressToImageIndex(size_t address, size_t& x, size_t& y, bool& valid) const {
+        size_t cropped_address = address % leds_per_channel;
+        size_t gap = 0;
+        size_t low = goal_led_strip_length_cropped;
+        for (; (low < addresses_per_goal); low+=2*goal_led_strip_length) {
+            if (cropped_address < low) {
+                break;
+            } else if (cropped_address < (low+num_goal_leds_excluded_double)) {
+                valid = false;
+                return;
+            }
+            gap+=num_goal_leds_excluded_double;
+        }
+
+        cropped_address -= gap;
+
+        valid = true;
+        x = (address % addresses_per_goal) / goal_led_strip_length;
+        if (x % 2 == 0) {
+            y = (cropped_address % goal_led_strip_length_cropped);
+        } else {
+            y = (goal_led_strip_length_cropped - 1) -
+                (cropped_address % goal_led_strip_length_cropped);
+        }
+    }
+
+    //assumes all LEDs are in 1 group for each pole, 12 strips
+    // TODO add position of pixel around the pole
+    void addressToCartesianPoint(size_t address, float& x_cart, float& y_cart, float& z_cart) const {
+        size_t x, y;
+        bool valid;
+        bool goal = isGoal(address);
+        if (goal) {
+            addressToImageIndex(address, x, y, valid);
+        }
+        size_t goal_index = address / leds_per_channel;
+        // for goals
+        if (goal) {
+            if (goal_index == 0) {
+                x_cart = -(pitch_length_half);
+                y_cart = -(goal_width_half);
+            } else if (goal_index == 1) {
+                x_cart = -(pitch_length_half);
+                y_cart = (goal_width_half);
+            } else if (goal_index == 2) {
+                x_cart = (pitch_length_half);
+                y_cart = (goal_width_half);
+            } else if (goal_index == 3) {
+                x_cart = (pitch_length_half);
+                y_cart = -(goal_width_half);
+            }
+            z_cart = y * pixel_height;
+        } else { //for lines
+            size_t progressIndex = address % leds_per_channel;
+            int side = getSide(address);
+            if (progressIndex < 200) {
+                x_cart = side * float(progressIndex) * pixel_length;
+                y_cart = (pitch_width_half);
+            } else if (progressIndex < 500) {
+                x_cart = side*(pitch_length_half); 
+                y_cart = (pitch_width_half) - (progressIndex+1 - 200) * pixel_length; 
+            } else {
+                x_cart = -side*((pitch_length_half) - (progressIndex+1 - 500) * pixel_length); 
+                y_cart = -(pitch_width_half); 
+            }
+            z_cart = 0;
+        }
+    }
+
 
 };
 
-const MappingConfing mapping_config;
-
-
-bool isGoal(size_t address) {
-    return (address / mapping_config.leds_per_channel) < 4;
-}
-
-// +x is true/positive
-int getSide(size_t address) {
-    return ((address / mapping_config.leds_per_channel) == 4) ? 1 : -1;
-}
-
-// +x is true/positive
-bool getSideBool(size_t address) {
-    return (address > (2*mapping_config.leds_per_channel));
-}
-
-//assumes all LEDs are in 1 group for each pole
-//removes last 5 address on each shortened strip
-void addressToImageIndex(size_t address, size_t& x, size_t& y, bool& valid) {
-    size_t cropped_address = address % mapping_config.leds_per_channel;
-    size_t gap = 0;
-    size_t low = mapping_config.goal_led_strip_length_cropped;
-    for (; (low < mapping_config.addresses_per_goal); low+=2*mapping_config.goal_led_strip_length) {
-        if (cropped_address < low) {
-            break;
-        } else if (cropped_address < (low+mapping_config.num_goal_leds_excluded_double)) {
-            valid = false;
-            return;
-        }
-        gap+=mapping_config.num_goal_leds_excluded_double;
-    }
-
-    cropped_address -= gap;
-
-    valid = true;
-    x = (address % mapping_config.addresses_per_goal) / mapping_config.goal_led_strip_length;
-    if (x % 2 == 0) {
-        y = (cropped_address % mapping_config.goal_led_strip_length_cropped);
-    } else {
-        y = (mapping_config.goal_led_strip_length_cropped - 1) -
-            (cropped_address % mapping_config.goal_led_strip_length_cropped);
-    }
-}
-
-//assumes all LEDs are in 1 group for each pole, 12 strips
-// TODO add position of pixel around the pole
-void addressToCartesianPoint(size_t address, float& x_cart, float& y_cart, float& z_cart) {
-    size_t x, y;
-    bool valid;
-    bool goal = isGoal(address);
-    if (goal) {
-        addressToImageIndex(address, x, y, valid);
-    }
-    size_t goal_index = address / mapping_config.leds_per_channel;
-    // for goals
-    if (goal) {
-        if (goal_index == 0) {
-            x_cart = -(mapping_config.pitch_length_half);
-            y_cart = -(mapping_config.goal_width_half);
-        } else if (goal_index == 1) {
-            x_cart = -(mapping_config.pitch_length_half);
-            y_cart = (mapping_config.goal_width_half);
-        } else if (goal_index == 2) {
-            x_cart = (mapping_config.pitch_length_half);
-            y_cart = (mapping_config.goal_width_half);
-        } else if (goal_index == 3) {
-            x_cart = (mapping_config.pitch_length_half);
-            y_cart = -(mapping_config.goal_width_half);
-        }
-        z_cart = y * mapping_config.pixel_height;
-    } else { //for lines
-        size_t progressIndex = address % mapping_config.leds_per_channel;
-        int side = getSide(address);
-        if (progressIndex < 200) {
-            x_cart = side * float(progressIndex) * mapping_config.pixel_length;
-            y_cart = (mapping_config.pitch_width_half);
-        } else if (progressIndex < 500) {
-            x_cart = side*(mapping_config.pitch_length_half); 
-            y_cart = (mapping_config.pitch_width_half) - (progressIndex+1 - 200) * mapping_config.pixel_length; 
-        } else {
-            x_cart = -side*((mapping_config.pitch_length_half) - (progressIndex+1 - 500) * mapping_config.pixel_length); 
-            y_cart = -(mapping_config.pitch_width_half); 
-        }
-        z_cart = 0;
-    }
-}
+const MappingConfig mapping_config;

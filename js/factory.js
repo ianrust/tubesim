@@ -1,5 +1,7 @@
  class Tube {
-    constructor(x, y, z, rotarySections, linearSections, length, radius) {
+    constructor(position, mapping_config) {
+        let rotarySections = mapping_config.addresses_per_goal / mapping_config.goal_led_strip_length;
+        let linearSections = mapping_config.goal_led_strip_length;
         this.numLeds = rotarySections*linearSections;
         let geometry = new THREE.BufferGeometry();
 
@@ -9,11 +11,14 @@
         let colors = [];
 
         let rotarySectionsAdjusted = rotarySections;
-
         for ( var heightIndex = 0; heightIndex <= linearSections; heightIndex ++ ) {
             for ( var rotaryIndex = 0; rotaryIndex < rotarySectionsAdjusted; rotaryIndex ++ ) {
                 let angle = rotaryIndex * Math.PI * 2 / rotarySectionsAdjusted;
-                vertices.push(radius * Math.cos(angle), radius * Math.sin(angle), heightIndex * length / linearSections);
+                vertices.push(
+                    mapping_config.radius * Math.cos(angle),
+                    mapping_config.radius * Math.sin(angle),
+                    heightIndex * mapping_config.pixel_height
+                );
                 normals.push(Math.cos(angle), Math.sin(angle), 1.0);
                 colors.push(0.1,0.1,0.1)
             }
@@ -82,7 +87,7 @@
             `,    
         });
         this.mesh = new THREE.Mesh( geometry, material );
-        this.mesh.position.set( x, y, z );
+        this.mesh.position.set( position.x, position.y, position.z );
     }
 
     setLEDValueMapped(i, r, g, b) {
@@ -98,8 +103,8 @@
 }
 
 class Line {
-    constructor(side, numLeds, thickness) {
-        this.numLeds = numLeds;
+    constructor(side, mapping_config) {
+        this.numLeds = mapping_config.leds_per_channel;
         let geometry = new THREE.BufferGeometry();
 
         let indices = [];
@@ -112,11 +117,23 @@ class Line {
         for ( var sectionIndex = 0; sectionIndex <= this.numLeds; sectionIndex ++ ) {
             for ( var lateralIndex = 0; lateralIndex <= 2; lateralIndex ++) {
                 if (sectionIndex < 200) {
-                    vertices.push(flip*sectionIndex*(5.0/100.0), (7.5 + (lateralIndex - 1) * thickness/2), 0);
+                    vertices.push(
+                        flip*sectionIndex*mapping_config.pixel_length,
+                        (mapping_config.pitch_width_half + (lateralIndex - 1) * mapping_config.line_width/2),
+                        0
+                    );
                 } else if (sectionIndex < 500) {
-                    vertices.push(flip*(10 + (lateralIndex - 1) * thickness/2), (7.5-(sectionIndex-200)*(5.0/100.0)), 0);
+                    vertices.push(
+                        flip*(mapping_config.pitch_length_half + (lateralIndex - 1) * mapping_config.line_width/2),
+                        (mapping_config.pitch_width_half-(sectionIndex-200)*mapping_config.pixel_length),
+                        0
+                    );
                 } else {
-                    vertices.push(flip*(700-sectionIndex)*(5.0/100.0), (-7.5 - (lateralIndex - 1) * thickness/2), 0);
+                    vertices.push(
+                        flip*(700-sectionIndex)*mapping_config.pixel_length,
+                        (-mapping_config.pitch_width_half - (lateralIndex - 1) * mapping_config.line_width/2),
+                        0
+                    );
                 }
                 normals.push(0, 0, 1.0);
                 colors.push(0.5, 0.5, 0.5);

@@ -8,43 +8,6 @@
 
 using namespace std;
 
-class ControllerState {
-public:
-    bool goal_left = false;
-    bool goal_right = false;
-    bool music_on = false;
-    uint32_t tick = 0;
-    ControllerState(){};
-
-    // Sim interface
-    // catches the edges but modifies no output state
-    void updateEvent(bool button_left, bool button_right) {
-        if (button_left) {
-            last_tick_left = tick;
-        }
-
-        if (button_right) {
-            last_tick_right = tick;
-        }
-    }
-    void updateOutputState() {
-        goal_left = (tick - last_tick_left) < goal_period && last_tick_left != 0;
-        goal_right = (tick - last_tick_right) < goal_period && last_tick_right != 0;
-        tick++;
-    }
-
-    // Arduino Interface
-    void update(bool button_left, bool button_right, int16_t* freq) {
-        music_on = sum(freq);
-        updateEvent(button_left, button_right);
-        updateOutputState();
-    }
-private:
-    uint32_t last_tick_left = 0;
-    uint32_t last_tick_right = 0;
-    uint32_t goal_period = 60;
-};
-
 /**
  * A test pattern to see ticks and sim working.
  */
@@ -63,7 +26,7 @@ Color8bit TestPattern(size_t address, ControllerState state, int16_t* freq) {
 Color8bit getGoalsColorPortable(size_t address, ControllerState state, int16_t* freq) {
     size_t x, y;
     bool valid;
-    addressToImageIndex(address, x, y, valid);
+    mapping_config.addressToImageIndex(address, x, y, valid);
     if (!valid) {
         return Color8bit(0, 0, 0);
     }
@@ -78,9 +41,9 @@ Color8bit getGoalsColorPortable(size_t address, ControllerState state, int16_t* 
         }
     } else {
         // only effect left/right adresses
-        if (getSideBool(address) && state.goal_right) {
+        if (mapping_config.getSideBool(address) && state.goal_right) {
             return Color8bit(uint8_t(255), uint8_t(0), tealmagenta[state.tick % tealmagenta_len]);
-        } else if (!getSideBool(address) && state.goal_left) {
+        } else if (!mapping_config.getSideBool(address) && state.goal_left) {
             return Color8bit(uint8_t(255), uint8_t(0), organic[state.tick % organic_len]);
         }
 
@@ -98,7 +61,7 @@ Color8bit getGoalsColorPortable(size_t address, ControllerState state, int16_t* 
 //        size_t offset_x = (state.tick / 12) % organic_width;
 //        size_t rgb_start = (y * organic_width + (x + offset_x)) * 3;
 //        float x_cart, y_cart, z_cart;
-//        addressToCartesianPoint(address, x_cart, y_cart, z_cart);
+//        mapping_config.addressToCartesianPoint(address, x_cart, y_cart, z_cart);
 //        int grad_level = z_cart * 255 / 5;
 //        float brightness = float(organic[rgb_start] + organic[rgb_start+1] + organic[rgb_start+2]) / (3.0 * 255.0);
 //        return Color8bit(int(grad_level), int((255-grad_level)*brightness), int((1.0-brightness)*255));
@@ -106,7 +69,7 @@ Color8bit getGoalsColorPortable(size_t address, ControllerState state, int16_t* 
 
         // // gradient block
         // float x_cart, y_cart, z_cart;
-        // addressToCartesianPoint(address, x_cart, y_cart, z_cart);
+        // mapping_config.addressToCartesianPoint(address, x_cart, y_cart, z_cart);
         // int g = int(255.0*(z_cart)/5.0);
         // int r = 255-g;
         // return Color8bit(r, g, 0);
@@ -116,7 +79,7 @@ Color8bit getGoalsColorPortable(size_t address, ControllerState state, int16_t* 
 // same as above, though this is for lines
 Color8bit getLinesColorPortable(int address, ControllerState state, int16_t* freq) {
     float x_cart, y_cart, z_cart;
-    addressToCartesianPoint(address, x_cart, y_cart, z_cart);
+    mapping_config.addressToCartesianPoint(address, x_cart, y_cart, z_cart);
     int r = int(255.0*fabs(y_cart +state.tick/3)/(mapping_config.pitch_width_half)) % 255;
     int g = int(255.0*fabs(x_cart+state.tick/3)/(mapping_config.pitch_length_half)) % 255;
     int b = 255-r;
