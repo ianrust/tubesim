@@ -18,15 +18,21 @@ Color8bit TestPattern(size_t address, ControllerState state, int16_t* freq) {
     return Color8bit(r,g,b);
 }
 
+Color8bit testLightHausPattern(size_t address, ControllerState state, int16_t* freq) {
+    float ratio;
+    mapping_config.addressToLighthausParameter(address, 1, 0.1, state.tick, ratio);
+    return interpolate(Color8bit(0, 56, 255), Color8bit(5, 255, 0), ratio);
+}
+
 // This will also take in the frequency information as well as any other inputs/state 
 // (ie button press changes state)
 // The main color function, takes in:
 //    - the address of the LED
 //    - the controller state
 Color8bit getGoalsColorPortable(size_t address, ControllerState state, int16_t* freq) {
-    size_t x, y;
+    size_t x_image, y_image;
     bool valid;
-    mapping_config.addressToImageIndex(address, x, y, valid);
+    mapping_config.addressToImageIndex(address, x_image, y_image, valid);
     float x_cart, y_cart, z_cart;
     mapping_config.addressToCartesianPoint(address, x_cart, y_cart, z_cart);
     if (!valid) {
@@ -44,30 +50,28 @@ Color8bit getGoalsColorPortable(size_t address, ControllerState state, int16_t* 
     } else {
         // only effect left/right adresses
         if (x_cart > 0 && state.goal_right) {
-            return Color8bit(uint8_t(255), uint8_t(0), tealmagenta[state.tick % tealmagenta_len]);
+            // image display example
+            size_t offset_x = (state.tick/(mapping_config.pitch_length_half));
+            size_t offset_y = 0*(state.tick/2); // zero removes the scroll in that direction
+            // reverse direction by inverting offset_x:
+            offset_x = pixel_triangles_width - 1 - offset_x;
+            size_t rgb_start = (((y_image+offset_y)%pixel_triangles_height) * pixel_triangles_width +
+                                (x_image + offset_x)%pixel_triangles_width) * 3;
+
+            return Color8bit(pixel_triangles[rgb_start], pixel_triangles[rgb_start+1], pixel_triangles[rgb_start+2]);
         } else if (x_cart < 0 && state.goal_left) {
-            return Color8bit(uint8_t(255), uint8_t(0), organic[state.tick % organic_len]);
+            // Mixing example
+            size_t offset_x = (state.tick / 12) % organic_width;
+            size_t rgb_start = (y_image * organic_width + (x_image + offset_x)) * 3;
+            float x_cart, y_cart, z_cart;
+            mapping_config.addressToCartesianPoint(address, x_cart, y_cart, z_cart);
+            int grad_level = z_cart * 255 / 5;
+            float brightness = float(organic[rgb_start] + organic[rgb_start+1] + organic[rgb_start+2]) / (3.0 * 255.0);
+            return Color8bit(int(grad_level), int((255-grad_level)*brightness), int((1.0-brightness)*255));
         }
 
-        size_t offset_x = (state.tick/(mapping_config.pitch_length_half));
-        size_t offset_y = (state.tick/2);
-        // reverse direction by inverting offset_x:
-        offset_x = pixel_triangles_width - 1 - offset_x;
-
-        // pixels_triangle block
-        size_t rgb_start = (((y+0*offset_y)%pixel_triangles_height) * pixel_triangles_width + (x + offset_x)%pixel_triangles_width) * 3;
-
-        return Color8bit(pixel_triangles[rgb_start], pixel_triangles[rgb_start+1], pixel_triangles[rgb_start+2]);
-
-//        // Organic block
-//        size_t offset_x = (state.tick / 12) % organic_width;
-//        size_t rgb_start = (y * organic_width + (x + offset_x)) * 3;
-//        float x_cart, y_cart, z_cart;
-//        mapping_config.addressToCartesianPoint(address, x_cart, y_cart, z_cart);
-//        int grad_level = z_cart * 255 / 5;
-//        float brightness = float(organic[rgb_start] + organic[rgb_start+1] + organic[rgb_start+2]) / (3.0 * 255.0);
-//        return Color8bit(int(grad_level), int((255-grad_level)*brightness), int((1.0-brightness)*255));
-
+        // ratio example
+        return testLightHausPattern(address, state, freq);
 
         // // gradient block
         // int g = int(255.0*(z_cart)/5.0)*0;
@@ -79,10 +83,13 @@ Color8bit getGoalsColorPortable(size_t address, ControllerState state, int16_t* 
 
 // same as above, though this is for lines
 Color8bit getLinesColorPortable(int address, ControllerState state, int16_t* freq) {
-    float x_cart, y_cart, z_cart;
-    mapping_config.addressToCartesianPoint(address, x_cart, y_cart, z_cart);
-    int r = int(255.0*fabs(y_cart+state.tick/3)/(mapping_config.pitch_width_half)) % 255;
-    int g = int(255.0*fabs(x_cart+state.tick/3)/(mapping_config.pitch_length_half)) % 255;
-    int b = 255-r;
-    return Color8bit(r, g, b);
+    return testLightHausPattern(address, state, freq);
+
+    // // crappy mod scroll example
+    // float x_cart, y_cart, z_cart;
+    // mapping_config.addressToCartesianPoint(address, x_cart, y_cart, z_cart);
+    // int r = int(255.0*fabs(y_cart+state.tick/3)/(mapping_config.pitch_width_half)) % 255;
+    // int g = int(255.0*fabs(x_cart+state.tick/3)/(mapping_config.pitch_length_half)) % 255;
+    // int b = 255-r;
+    // return Color8bit(r, g, b);
 }

@@ -6,6 +6,7 @@
 
 #ifndef RECORD
 #include "patterns.h"
+#include "gamma.h"
 #include <OctoWS2811.h>
 
 #define PIN_LEFT 33
@@ -45,10 +46,10 @@ void loop() {
     readFrequenciesTimed();
     if (mapping_config.isGoal(ledIndex)) {
       color = getGoalsColorPortable(ledIndex, state, freq_out);
-      leds.setPixel(ledIndex, color.r, color.b, color.g);
+      leds.setPixel(ledIndex, gamma8[color.r], gamma8[color.b], gamma8[color.g]);
     } else if (mapping_config.isGoal(ledIndex)) {
       color = getGoalsColorPortable(ledIndex, state, freq_out);
-      leds.setPixel(ledIndex, color.r, color.b, color.g);
+      leds.setPixel(ledIndex, gamma8[color.r], gamma8[color.b], gamma8[color.g]);
     }
   }
   leds.show();

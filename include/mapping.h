@@ -113,18 +113,19 @@ public:
     //assumes all LEDs are in 1 group for each pole, 12 strips
     // TODO add position of pixel around the pole
     void addressToCartesianPoint(size_t address, float& x_cart, float& y_cart, float& z_cart) const {
-        size_t x, y;
+        size_t x_image, y_image;
         bool valid;
         bool goal = isGoal(address);
         if (goal) {
-            addressToImageIndex(address, x, y, valid);
+            addressToImageIndex(address, x_image, y_image, valid);
         }
         size_t channel_index = address / leds_per_channel;
         // for goals
         if (goal) {
+            // TODO add radius here
             x_cart = positions[channel_index].x;
             y_cart = positions[channel_index].y;
-            z_cart = y * pixel_height;
+            z_cart = y_image * pixel_height;
         } else { //for lines
             size_t progressIndex = address % leds_per_channel;
             int side = positions[channel_index].x;
@@ -142,6 +143,29 @@ public:
         }
     }
 
+    // num_wraps around the pole interpolated b/w 2 colors (parametrizes by ratio). wrapps on speed
+    // which is in m/(offset index). offset is usually state.tick but you decide!
+    void addressToLighthausParameter(size_t address, uint8_t num_wraps, float speed, size_t offset, float& ratio) const {
+        size_t x_image, y_image;
+        bool valid;
+        float progress;
+        // progress is the meter distance from midline to top of pole, manhattan distance;
+        if (isGoal(address)) {
+            addressToImageIndex(address, x_image, y_image, valid);
+            progress = y_image * pixel_height + pitch_length_half;
+        } else if (isLine(address)) {
+            float x_cart, y_cart, z_cart;
+            addressToCartesianPoint(address, x_cart, y_cart, z_cart);
+            progress = fabs(x_cart);
+        }
+
+        float period = (pitch_length_half + goal_led_strip_length_cropped*pixel_height) / num_wraps;
+
+        ratio = 2*fabs(fmod(progress - speed*offset, period)) / period;
+        if (ratio > 1.0) {
+            ratio *= 2-ratio;
+        }
+    }
 
 };
 

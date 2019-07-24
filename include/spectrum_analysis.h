@@ -1,3 +1,5 @@
+#pragma once
+
 using namespace std;
 
 void normalize255(int16_t* freq) {

@@ -1,5 +1,6 @@
 #pragma once
-#include "gamma.h"
+
+#include "spectrum_analysis.h"
 
 using namespace std;
 
@@ -9,15 +10,23 @@ struct Color8bit {
     uint8_t b;
     Color8bit() {}
     Color8bit(int r_, int g_, int b_) {
-        r = gamma8[min(255, max(r_, 0))];
-        g = gamma8[min(255, max(g_, 0))];
-        b = gamma8[min(255, max(b_, 0))];
+        r = min(255, max(r_, 0));
+        g = min(255, max(g_, 0));
+        b = min(255, max(b_, 0));
     }
     Color8bit(uint8_t r_, uint8_t g_, uint8_t b_) {
-        r = gamma8[r_];
-        g = gamma8[g_];
-        b = gamma8[b_];
+        r = r_;
+        g = g_;
+        b = b_;
     }
+};
+
+Color8bit interpolate(const Color8bit& c1, const Color8bit& c2, float ratio) {
+    Color8bit interp_value;
+    interp_value.r = c1.r * (1-ratio) + c2.r * ratio;
+    interp_value.g = c1.g * (1-ratio) + c2.g * ratio;
+    interp_value.b = c1.b * (1-ratio) + c2.b * ratio;
+    return interp_value;
 };
 
 class ControllerState {
@@ -47,7 +56,7 @@ public:
 
     // Arduino Interface
     void update(bool button_left, bool button_right, int16_t* freq) {
-        music_on = sum(freq);
+        music_on = sum(freq) > 0;
         updateEvent(button_left, button_right);
         updateOutputState();
     }
