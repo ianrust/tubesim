@@ -1,3 +1,4 @@
+cd images && python3 img_to_c.py && cd ..
 source ~/emsdk/emsdk_env.sh
 emcc --bind include/js_patterns.cpp -o js/patterns.js -s "BINARYEN_TRAP_MODE='clamp'"
 

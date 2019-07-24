@@ -4,3 +4,4 @@ js/patterns.*
 .idea
 .pioenvs
 .DS_Store
+images/*.h
