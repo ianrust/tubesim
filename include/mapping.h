@@ -1,3 +1,7 @@
+#pragma once
+
+#include <iostream>
+
 struct Position {
     float x = 0;
     float y = 0;
@@ -8,7 +12,16 @@ struct Position {
         y = y_;
         z = 0;
     }
+    Position(float x_, float y_, float z_) {
+        x = x_;
+        y = y_;
+        z = z_;
+    }
 };
+
+float dotProduct(const Position& p1, const Position& p2) {
+    return (p1.x * p2.x + p1.y * p2.y + p1.z * p2.z);
+}
 
 enum ChannelType {
     GOALPOST = 0,
@@ -107,18 +120,18 @@ public:
         } else {
             y = (goal_led_strip_length_cropped - 1) -
                 (cropped_address % goal_led_strip_length_cropped);
-        }
-    }
-
-    //assumes all LEDs are in 1 group for each pole, 12 strips
-    // TODO add position of pixel around the pole
+         }
+    } 
+ 
+    //a ssumes all LEDs are in 1 group for each pole, 12 strips
+    //  TODO add position of pixel around the pole
     void addressToCartesianPoint(size_t address, float& x_cart, float& y_cart, float& z_cart) const {
-        size_t x_image, y_image;
-        bool valid;
-        bool goal = isGoal(address);
-        if (goal) {
-            addressToImageIndex(address, x_image, y_image, valid);
-        }
+         size_t x_image, y_image;
+         bool valid;
+         bool goal = isGoal(address);
+         if (goal) {
+             addressToImageIndex(address, x_image, y_image, valid);
+         }
         size_t channel_index = address / leds_per_channel;
         // for goals
         if (goal) {
@@ -136,7 +149,7 @@ public:
                 x_cart = side*(pitch_length_half); 
                 y_cart = (pitch_width_half) - (progressIndex+1 - 200) * pixel_length; 
             } else {
-                x_cart = -side*((pitch_length_half) - (progressIndex+1 - 500) * pixel_length); 
+                x_cart = side*((pitch_length_half) - (progressIndex+1 - 500) * pixel_length); 
                 y_cart = -(pitch_width_half); 
             }
             z_cart = 0;
@@ -162,6 +175,26 @@ public:
         float period = (pitch_length_half + goal_led_strip_length_cropped*pixel_height) / num_wraps;
 
         ratio = 2*fabs(fmod(progress - speed*offset, period)) / period;
+        if (ratio > 1.0) {
+            ratio *= 2-ratio;
+        }
+    }
+
+    // interpolate b/w 2 colors in the direction defined by direction
+    void addressToLighthausParameterCartesian(
+        size_t address, 
+        float scale,
+        float speed,
+        size_t offset,
+        const Position& direction,
+        float& ratio
+        ) const {
+
+        float x_cart, y_cart, z_cart;
+        addressToCartesianPoint(address, x_cart, y_cart, z_cart);
+        float progress = dotProduct(Position(x_cart, y_cart, z_cart), direction);
+
+        ratio = 2*fabs(fmod(progress - speed*offset, scale)) / scale;
         if (ratio > 1.0) {
             ratio *= 2-ratio;
         }
