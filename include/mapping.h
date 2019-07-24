@@ -74,16 +74,6 @@ public:
         return channels[int(address / leds_per_channel)] == ChannelType::LINES;
     }
 
-    // +x is true/positive
-    int getSide(size_t address) const {
-        return ((address / leds_per_channel) == 4) ? 1 : -1;
-    }
-
-    // +x is true/positive
-    bool getSideBool(size_t address) const {
-        return (address > (2*leds_per_channel));
-    }
-
     ChannelType getChannelType(size_t channel) const {
         return channels[channel];
     }
@@ -129,26 +119,15 @@ public:
         if (goal) {
             addressToImageIndex(address, x, y, valid);
         }
-        size_t goal_index = address / leds_per_channel;
+        size_t channel_index = address / leds_per_channel;
         // for goals
         if (goal) {
-            if (goal_index == 0) {
-                x_cart = -(pitch_length_half);
-                y_cart = -(goal_width_half);
-            } else if (goal_index == 1) {
-                x_cart = -(pitch_length_half);
-                y_cart = (goal_width_half);
-            } else if (goal_index == 2) {
-                x_cart = (pitch_length_half);
-                y_cart = (goal_width_half);
-            } else if (goal_index == 3) {
-                x_cart = (pitch_length_half);
-                y_cart = -(goal_width_half);
-            }
+            x_cart = positions[channel_index].x;
+            y_cart = positions[channel_index].y;
             z_cart = y * pixel_height;
         } else { //for lines
             size_t progressIndex = address % leds_per_channel;
-            int side = getSide(address);
+            int side = positions[channel_index].x;
             if (progressIndex < 200) {
                 x_cart = side * float(progressIndex) * pixel_length;
                 y_cart = (pitch_width_half);

@@ -27,6 +27,8 @@ Color8bit getGoalsColorPortable(size_t address, ControllerState state, int16_t* 
     size_t x, y;
     bool valid;
     mapping_config.addressToImageIndex(address, x, y, valid);
+    float x_cart, y_cart, z_cart;
+    mapping_config.addressToCartesianPoint(address, x_cart, y_cart, z_cart);
     if (!valid) {
         return Color8bit(0, 0, 0);
     }
@@ -41,9 +43,9 @@ Color8bit getGoalsColorPortable(size_t address, ControllerState state, int16_t* 
         }
     } else {
         // only effect left/right adresses
-        if (mapping_config.getSideBool(address) && state.goal_right) {
+        if (x_cart > 0 && state.goal_right) {
             return Color8bit(uint8_t(255), uint8_t(0), tealmagenta[state.tick % tealmagenta_len]);
-        } else if (!mapping_config.getSideBool(address) && state.goal_left) {
+        } else if (x_cart < 0 && state.goal_left) {
             return Color8bit(uint8_t(255), uint8_t(0), organic[state.tick % organic_len]);
         }
 
@@ -68,11 +70,10 @@ Color8bit getGoalsColorPortable(size_t address, ControllerState state, int16_t* 
 
 
         // // gradient block
-        // float x_cart, y_cart, z_cart;
-        // mapping_config.addressToCartesianPoint(address, x_cart, y_cart, z_cart);
-        // int g = int(255.0*(z_cart)/5.0);
-        // int r = 255-g;
-        // return Color8bit(r, g, 0);
+        // int g = int(255.0*(z_cart)/5.0)*0;
+        // int b = int(255.0*(x_cart+10.0)/20.0);
+        // int r = 255-b;
+        // return Color8bit(r, g, b);
     }
 }
 
@@ -80,7 +81,7 @@ Color8bit getGoalsColorPortable(size_t address, ControllerState state, int16_t* 
 Color8bit getLinesColorPortable(int address, ControllerState state, int16_t* freq) {
     float x_cart, y_cart, z_cart;
     mapping_config.addressToCartesianPoint(address, x_cart, y_cart, z_cart);
-    int r = int(255.0*fabs(y_cart +state.tick/3)/(mapping_config.pitch_width_half)) % 255;
+    int r = int(255.0*fabs(y_cart+state.tick/3)/(mapping_config.pitch_width_half)) % 255;
     int g = int(255.0*fabs(x_cart+state.tick/3)/(mapping_config.pitch_length_half)) % 255;
     int b = 255-r;
     return Color8bit(r, g, b);
