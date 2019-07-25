@@ -1,32 +1,8 @@
 #pragma once
 
 #include <iostream>
-
-struct Position {
-    float x = 0;
-    float y = 0;
-    float z = 0;
-    Position(){};
-    Position(float x_, float y_) {
-        x = x_;
-        y = y_;
-        z = 0;
-    }
-    Position(float x_, float y_, float z_) {
-        x = x_;
-        y = y_;
-        z = z_;
-    }
-};
-
-float dotProduct(const Position& p1, const Position& p2) {
-    return (p1.x * p2.x + p1.y * p2.y + p1.z * p2.z);
-}
-
-float fmodFast(const float& f, const float& divisor) {
-    int quotient = f / divisor;
-    return (f - (divisor * quotient));
-}
+#include "fastmath.h"
+#include "types.h"
 
 enum ChannelType {
     GOALPOST = 0,

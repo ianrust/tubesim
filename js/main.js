@@ -1,5 +1,7 @@
 var Module = {
     onRuntimeInitialized: () => {
+        Module.initializeTrigTables();
+
         var container, stats;
 
         var scene = new THREE.Scene();

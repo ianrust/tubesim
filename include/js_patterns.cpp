@@ -56,6 +56,8 @@ EMSCRIPTEN_BINDINGS(my_module) {
     ;
     emscripten::function("getLinesColor", &getLinesColor)
     ;
+    emscripten::function("initializeTrigTables", &initializeTrigTables)
+    ;
     emscripten::enum_<ChannelType>("ChannelType")
         .value("GOALPOST", ChannelType::GOALPOST)
         .value("LINES", ChannelType::LINES)

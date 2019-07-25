@@ -29,6 +29,23 @@ Color8bit interpolate(const Color8bit& c1, const Color8bit& c2, float ratio) {
     return interp_value;
 };
 
+struct Position {
+    float x = 0;
+    float y = 0;
+    float z = 0;
+    Position(){};
+    Position(float x_, float y_) {
+        x = x_;
+        y = y_;
+        z = 0;
+    }
+    Position(float x_, float y_, float z_) {
+        x = x_;
+        y = y_;
+        z = z_;
+    }
+};
+
 class ControllerState {
 public:
     bool goal_left = false;
