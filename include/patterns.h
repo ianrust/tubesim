@@ -22,9 +22,6 @@ Color8bit testLightHausPattern(size_t address, ControllerState state, int16_t* f
     float ratio;
     float theta = fmod(state.tick * 0.03, 2*M_PI);
     Position direction = Position(cos(theta), sin(theta), 0);
-    if (address == 100) {
-        std::cout << theta << std::endl;
-    }
     mapping_config.addressToLighthausParameterCartesian(address, 3, 0.1, state.tick, direction, ratio);
     // mapping_config.addressToLighthausParameter(address, 0.5, 0.1, state.tick, ratio);
     return interpolate(Color8bit(138, 43, 226), Color8bit(0, 255, 0), ratio);
