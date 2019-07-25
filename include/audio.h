@@ -22,7 +22,7 @@ uint8_t freq_amp;
 
 // filtered variables
 uint32_t last_spectrum_read_micros = 0;
-uint32_t spectrum_read_period_micros = 1500;
+uint32_t spectrum_read_period_micros = 10000;
 uint32_t current_micros;
 
 
