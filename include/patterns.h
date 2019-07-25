@@ -19,11 +19,11 @@ Color8bit TestPattern(size_t address, ControllerState state, int16_t* freq) {
 }
 
 Color8bit testLightHausPattern(size_t address, ControllerState state, int16_t* freq) {
-    float ratio;
-    float theta = fmod(state.tick * 0.03, 2*M_PI);
-    Position direction = Position(cos(theta), sin(theta), 0);
+    static float ratio;
+    static float theta = fmodFast(state.tick * 0.03, 2*M_PI);
+    static Position direction = Position(cos(theta), sin(theta), 0);
     mapping_config.addressToLighthausParameterCartesian(address, 3, 0.1, state.tick, direction, ratio);
-    // mapping_config.addressToLighthausParameter(address, 0.5, 0.1, state.tick, ratio);
+//    mapping_config.addressToLighthausParameter(address, 0.5, 0.1, state.tick, ratio);
     return interpolate(Color8bit(138, 43, 226), Color8bit(0, 255, 0), ratio);
 }
 

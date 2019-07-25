@@ -12,11 +12,11 @@
 #define PIN_LEFT 33
 #define PIN_RIGHT 34
 
-int ledIndex = 0;
+size_t ledIndex = 0;
 Color8bit color;
 
 const int ledsPerStrip = 700;
-const int numActiveAddresses = ledsPerStrip * 8;
+const int numActiveAddresses = ledsPerStrip * 7;
 
 DMAMEM int displayMemory[ledsPerStrip*6];
 int drawingMemory[ledsPerStrip*6];
@@ -29,12 +29,16 @@ bool indicator = false;
 
 ControllerState state;
 
+//unsigned long last_frame_micros = 0;
+
 void setup() {
   leds.begin();
 
   pinMode(LED_BUILTIN, OUTPUT);
   pinMode(PIN_LEFT, INPUT_PULLUP);
   pinMode(PIN_RIGHT, INPUT_PULLUP);
+
+//  Serial.begin(9600);
 
   setupSpectrum();
   delay(100);
@@ -47,8 +51,8 @@ void loop() {
     if (mapping_config.isGoal(ledIndex)) {
       color = getGoalsColorPortable(ledIndex, state, freq_out);
       leds.setPixel(ledIndex, gamma8[color.r], gamma8[color.b], gamma8[color.g]);
-    } else if (mapping_config.isGoal(ledIndex)) {
-      color = getGoalsColorPortable(ledIndex, state, freq_out);
+    } else if (mapping_config.isLine(ledIndex)) {
+      color = getLinesColorPortable(ledIndex, state, freq_out);
       leds.setPixel(ledIndex, gamma8[color.r], gamma8[color.b], gamma8[color.g]);
     } else {
       // skip inactive addresses
@@ -56,6 +60,10 @@ void loop() {
     }
   }
   leds.show();
+
+//  Serial.println("Frame rate:");
+//  Serial.println(micros() - last_frame_micros);
+//  last_frame_micros = micros();
 
   // slow indicator loop
   if (state.tick % 10 == 0) {

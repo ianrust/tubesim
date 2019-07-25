@@ -1,6 +1,6 @@
 js/patterns.*
 .vscode
-.pio
+.pio*
 .idea
 .pioenvs
 .DS_Store

@@ -23,6 +23,11 @@ float dotProduct(const Position& p1, const Position& p2) {
     return (p1.x * p2.x + p1.y * p2.y + p1.z * p2.z);
 }
 
+float fmodFast(const float& f, const float& divisor) {
+    int quotient = f / divisor;
+    return (f - (divisor * quotient));
+}
+
 enum ChannelType {
     GOALPOST = 0,
     LINES = 1,
@@ -169,12 +174,20 @@ public:
         } else if (isLine(address)) {
             float x_cart, y_cart, z_cart;
             addressToCartesianPoint(address, x_cart, y_cart, z_cart);
-            progress = fabs(x_cart);
+            if (x_cart < 0) {
+                progress = -x_cart;
+            } else {
+                progress = x_cart;
+            }
         }
-
         float period = (pitch_length_half + goal_led_strip_length_cropped*pixel_height) / num_wraps;
 
-        ratio = 2*fabs(fmod(progress - speed*offset, period)) / period;
+        // fabs/fmod are slow
+        progress -= speed*offset;
+        ratio = 2*fmodFast(progress, period) / period;
+        if (ratio < 0) {
+            ratio *= -1;
+        }
         if (ratio > 1.0) {
             ratio *= 2-ratio;
         }
@@ -192,9 +205,14 @@ public:
 
         float x_cart, y_cart, z_cart;
         addressToCartesianPoint(address, x_cart, y_cart, z_cart);
-        float progress = dotProduct(Position(x_cart, y_cart, z_cart), direction);
+        float progress = x_cart * direction.x + y_cart * direction.y + z_cart * direction.z;
 
-        ratio = 2*fabs(fmod(progress - speed*offset, scale)) / scale;
+        // fabs/fmod are slow
+        progress -= speed*offset;
+        ratio = 2*fmodFast(progress, scale) / scale;
+        if (ratio < 0) {
+            ratio *= -1;
+        }
         if (ratio > 1.0) {
             ratio *= 2-ratio;
         }
