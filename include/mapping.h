@@ -107,15 +107,13 @@ public:
     //a ssumes all LEDs are in 1 group for each pole, 12 strips
     //  TODO add position of pixel around the pole
     void addressToCartesianPoint(size_t address, float& x_cart, float& y_cart, float& z_cart) const {
-         size_t x_image, y_image;
-         bool valid;
-         bool goal = isGoal(address);
-         if (goal) {
-             addressToImageIndex(address, x_image, y_image, valid);
-         }
+        size_t x_image = 0;
+        size_t y_image = 0;
+        bool valid;
         size_t channel_index = address / leds_per_channel;
         // for goals
-        if (goal) {
+        if (isGoal(address)) {
+            addressToImageIndex(address, x_image, y_image, valid);
             // TODO add radius here
             x_cart = positions[channel_index].x;
             y_cart = positions[channel_index].y;
