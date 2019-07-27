@@ -5,3 +5,4 @@ js/patterns.*
 .pioenvs
 .DS_Store
 images/*.h
+!images/images.h

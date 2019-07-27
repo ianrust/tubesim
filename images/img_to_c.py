@@ -2,31 +2,42 @@ import os
 import sys
 from PIL import Image
 
-def codeGen(fn_img):
+def codeGen(fn_img, start):
     fn = fn_img[:-4]
     fn_code = fn + ".h"
+    data = []
     with open(fn_code, "w+") as code:
 
         with Image.open(fn_img) as image:
 
             width, height = image.size
-            code.write("const size_t " + fn + "_len = " + str(width*height*3) + ";\r\n")
-            code.write("const size_t " + fn + "_width = " + str(width) + ";\r\n")
-            code.write("const size_t " + fn + "_height = " + str(height) + ";\r\n")
-            code.write("const uint8_t " + fn + "[" + str(width*height*3) + "] = { ")
+            code.write("#pragma once\r\n")
+            code.write("const FlashImage " + fn + "(" + str(width*height*3) + ", " + str(width) + ", " + str(height) + ", " + str(start) + ");\r\n")
             for h in range(height):
                 for w in range(width):
                     rgb_im = image.convert('RGB')
                     r, g, b = rgb_im.getpixel((w, h))
-                    if (r > 255 or g > 255 or b > 255):
-                        print(r, g, b)
-                    code.write(str(r) + " , " + str(g) + " , " + str(b))
-                    if ((w != (width-1)) or (h != (height-1))):
-                        code.write(" , ")
-
-            code.write(" };\r\n")
+                    data.append(r)
+                    data.append(g)
+                    data.append(b)
+    return data, fn_code
 
 if __name__ == "__main__":
+    data = []
+    fns = []
     for fn_img in os.listdir("./"):
         if ".png" in fn_img or ".jpg" in fn_img:
-            codeGen(fn_img)
+            d, fn = codeGen(fn_img, len(data))
+            data += d
+            fns += [fn]
+
+    with open("imagedata.h", "w+") as code:
+        for fn in fns:
+            code.write("#include \"" + fn + "\"\r\n")
+
+        code.write("const uint8_t image_data[" + str(len(data)) + "] = { ");
+        for i, datum in enumerate(data):
+            code.write(str(datum))
+            if (i != len(data)):
+                code.write(" , ")
+        code.write(" };\r\n")

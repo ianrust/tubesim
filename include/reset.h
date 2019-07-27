@@ -1,3 +1,5 @@
+#pragma once
+
 // Add RESET codes to reboot the chip
 #define RESTART_ADDR       0xE000ED0C
 #define READ_RESTART()     (*(volatile uint32_t *)RESTART_ADDR)

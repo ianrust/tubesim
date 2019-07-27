@@ -29,6 +29,19 @@ Color8bit interpolate(const Color8bit& c1, const Color8bit& c2, float ratio) {
     return interp_value;
 };
 
+struct FlashImage {
+    size_t len;
+    size_t width;
+    size_t height;
+    size_t start;
+    FlashImage(size_t len_, size_t width_, size_t height_, size_t start_) {
+        len = len_;
+        width = width_;
+        height = height_;
+        start = start_;
+    }
+};
+
 struct Cached {
     bool cached = false;
 };

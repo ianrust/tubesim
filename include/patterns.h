@@ -51,21 +51,20 @@ Color8bit getGoalsColorPortable(size_t address, ControllerState state, int16_t* 
         // only effect left/right adresses
         if (position.x > 0 && state.goal_right) {
             // image display example
-            size_t offset_x = (state.tick/(mapping_config.pitch_length_half));
-            size_t offset_y = 0*(state.tick/2); // zero removes the scroll in that direction
-            // reverse direction by inverting offset_x:
-            offset_x = pixel_triangles_width - 1 - offset_x;
-            size_t rgb_start = (((image_index.y + offset_y)%pixel_triangles_height) * pixel_triangles_width +
-                                 (image_index.x + offset_x)%pixel_triangles_width) * 3;
+            size_t x_offset = (state.tick/2);
+            size_t y_offset = 0*(state.tick/2); // zero removes the scroll in that direction
 
-            return Color8bit(pixel_triangles[rgb_start], pixel_triangles[rgb_start+1], pixel_triangles[rgb_start+2]);
+            return getImageColor(pixel_triangles, image_index, x_offset, y_offset, false, true);
         } else if (position.x < 0 && state.goal_left) {
             // Mixing example
-            size_t offset_x = (state.tick / 12) % organic_width;
-            size_t rgb_start = (image_index.y * organic_width + (image_index.x + offset_x)) * 3;
+            size_t x_offset = (state.tick / 12);
+
+            Color8bit image_color = getImageColor(organic, image_index, x_offset, 0, true, true);
+
             Position position = mapping_config.addressToCartesianPoint(address);
             int grad_level = position.z * 255 / 5;
-            float brightness = float(organic[rgb_start] + organic[rgb_start+1] + organic[rgb_start+2]) / (3.0 * 255.0);
+            float brightness = float(image_color.r + image_color.g + image_color.b) / (3.0 * 255.0);
+
             return Color8bit(int(grad_level), int((255-grad_level)*brightness), int((1.0-brightness)*255));
         }
 
