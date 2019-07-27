@@ -1,9 +1,6 @@
 
 #include "audio.h"
 
-#ifdef GOALS
-#endif
-
 #ifndef RECORD
 #include "patterns.h"
 #include "gamma.h"
@@ -29,7 +26,9 @@ bool indicator = false;
 
 ControllerState state;
 
-//unsigned long last_frame_micros = 0;
+#ifdef FPS
+unsigned long last_frame_micros = 0;
+#endif
 
 void setup() {
   leds.begin();
@@ -38,8 +37,9 @@ void setup() {
   pinMode(PIN_LEFT, INPUT_PULLUP);
   pinMode(PIN_RIGHT, INPUT_PULLUP);
 
-//  Serial.begin(9600);
-
+#ifdef FPS
+  Serial.begin(9600);
+#endif
   setupSpectrum();
   delay(100);
 }
@@ -61,9 +61,13 @@ void loop() {
   }
   leds.show();
 
-//  Serial.println("Frame rate:");
-//  Serial.println(micros() - last_frame_micros);
-//  last_frame_micros = micros();
+#ifdef FPS
+  Serial.println("Frame rate:");
+  float fps = micros() - last_frame_micros;
+  fps = 1000000.0 / fps;
+  Serial.println(fps);
+  last_frame_micros = micros();
+#endif
 
   // slow indicator loop
   if (state.tick % 10 == 0) {

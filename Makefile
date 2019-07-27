@@ -15,6 +15,18 @@ c:
 upload:
 	platformio run -e goals --target upload
 
+uploadfps:
+	platformio run -e fps --target upload
+
+sleep:
+	sleep 3
+
+monitor:
+	platformio device monitor
+
+
+fps: images uploadfps sleep monitor
+
 flash: images upload
 
 all: images js c
