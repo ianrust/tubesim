@@ -5,7 +5,7 @@
 #include "mapping.h"
 #include "types.h"
 #include "fastmath.h"
-#include "../images/images.h"
+#include "images.h"
 
 using namespace std;
 
@@ -54,12 +54,12 @@ Color8bit getGoalsColorPortable(size_t address, ControllerState state, int16_t* 
             size_t x_offset = (state.tick/2);
             size_t y_offset = 0*(state.tick/2); // zero removes the scroll in that direction
 
-            return getImageColor(pixel_triangles, image_index, x_offset, y_offset, false, true);
+            return getImageColor(pixel_triangles, address, x_offset, y_offset, false, true);
         } else if (position.x < 0 && state.goal_left) {
             // Mixing example
             size_t x_offset = (state.tick / 12);
 
-            Color8bit image_color = getImageColor(organic, image_index, x_offset, 0, true, true);
+            Color8bit image_color = getImageColor(organic, address, x_offset, 0, true, true);
 
             Position position = mapping_config.addressToCartesianPoint(address);
             int grad_level = position.z * 255 / 5;

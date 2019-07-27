@@ -1,17 +1,18 @@
 #pragma once
 
 // creates a const array in flash that ImageData will index into
-#include "../include/types.h"
-#include "imagedata.h"
+#include "types.h"
+#include "../images/imagedata.h"
 
 Color8bit getImageColor(const FlashImage& flash_image,
-                        ImageIndex& image_index,
+                        size_t& address,
                         size_t x_offset,
                         size_t y_offset,
                         bool x_forward,
                         bool y_forward) {
-    // reverse direction by inverting offset_x:
+    ImageIndex image_index = mapping_config.addressToImageIndex(address);
 
+    // reverse direction by inverting offset
     if (!x_forward) {
         x_offset = flash_image.width - 1 - x_offset;
     }
