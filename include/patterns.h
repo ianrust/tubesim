@@ -33,12 +33,9 @@ Color8bit testLightHausPattern(size_t address, ControllerState state, int16_t* f
 //    - the address of the LED
 //    - the controller state
 Color8bit getGoalsColorPortable(size_t address, ControllerState state, int16_t* freq) {
-    size_t x_image, y_image;
-    bool valid;
-    mapping_config.addressToImageIndex(address, x_image, y_image, valid);
-    float x_cart, y_cart, z_cart;
-    mapping_config.addressToCartesianPoint(address, x_cart, y_cart, z_cart);
-    if (!valid) {
+    ImageIndex image_index = mapping_config.addressToImageIndex(address);
+    Position position = mapping_config.addressToCartesianPoint(address);
+    if (!image_index.valid) {
         return Color8bit(0, 0, 0);
     }
     normalize255(freq);
@@ -52,23 +49,22 @@ Color8bit getGoalsColorPortable(size_t address, ControllerState state, int16_t* 
         }
     } else {
         // only effect left/right adresses
-        if (x_cart > 0 && state.goal_right) {
+        if (position.x > 0 && state.goal_right) {
             // image display example
             size_t offset_x = (state.tick/(mapping_config.pitch_length_half));
             size_t offset_y = 0*(state.tick/2); // zero removes the scroll in that direction
             // reverse direction by inverting offset_x:
             offset_x = pixel_triangles_width - 1 - offset_x;
-            size_t rgb_start = (((y_image+offset_y)%pixel_triangles_height) * pixel_triangles_width +
-                                (x_image + offset_x)%pixel_triangles_width) * 3;
+            size_t rgb_start = (((image_index.y + offset_y)%pixel_triangles_height) * pixel_triangles_width +
+                                 (image_index.x + offset_x)%pixel_triangles_width) * 3;
 
             return Color8bit(pixel_triangles[rgb_start], pixel_triangles[rgb_start+1], pixel_triangles[rgb_start+2]);
-        } else if (x_cart < 0 && state.goal_left) {
+        } else if (position.x < 0 && state.goal_left) {
             // Mixing example
             size_t offset_x = (state.tick / 12) % organic_width;
-            size_t rgb_start = (y_image * organic_width + (x_image + offset_x)) * 3;
-            float x_cart, y_cart, z_cart;
-            mapping_config.addressToCartesianPoint(address, x_cart, y_cart, z_cart);
-            int grad_level = z_cart * 255 / 5;
+            size_t rgb_start = (image_index.y * organic_width + (image_index.x + offset_x)) * 3;
+            Position position = mapping_config.addressToCartesianPoint(address);
+            int grad_level = position.z * 255 / 5;
             float brightness = float(organic[rgb_start] + organic[rgb_start+1] + organic[rgb_start+2]) / (3.0 * 255.0);
             return Color8bit(int(grad_level), int((255-grad_level)*brightness), int((1.0-brightness)*255));
         }
@@ -77,8 +73,8 @@ Color8bit getGoalsColorPortable(size_t address, ControllerState state, int16_t* 
         return testLightHausPattern(address, state, freq);
 
         // // gradient block
-        // int g = int(255.0*(z_cart)/5.0)*0;
-        // int b = int(255.0*(x_cart+10.0)/20.0);
+        // int g = int(255.0*(position.z)/5.0)*0;
+        // int b = int(255.0*(position.x+10.0)/20.0);
         // int r = 255-b;
         // return Color8bit(r, g, b);
     }
@@ -89,10 +85,10 @@ Color8bit getLinesColorPortable(int address, ControllerState state, int16_t* fre
     return testLightHausPattern(address, state, freq);
 
     // // crappy mod scroll example
-    // float x_cart, y_cart, z_cart;
-    // mapping_config.addressToCartesianPoint(address, x_cart, y_cart, z_cart);
-    // int r = int(255.0*fabs(y_cart+state.tick/3)/(mapping_config.pitch_width_half)) % 255;
-    // int g = int(255.0*fabs(x_cart+state.tick/3)/(mapping_config.pitch_length_half)) % 255;
+    // float position.x, position.y, position.z;
+    // mapping_config.addressToCartesianPoint(address, position.x, position.y, position.z);
+    // int r = int(255.0*fabs(position.y+state.tick/3)/(mapping_config.pitch_width_half)) % 255;
+    // int g = int(255.0*fabs(position.x+state.tick/3)/(mapping_config.pitch_length_half)) % 255;
     // int b = 255-r;
     // return Color8bit(r, g, b);
 }

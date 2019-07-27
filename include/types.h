@@ -29,7 +29,11 @@ Color8bit interpolate(const Color8bit& c1, const Color8bit& c2, float ratio) {
     return interp_value;
 };
 
-struct Position {
+struct Cached {
+    bool cached = false;
+};
+
+struct Position : Cached {
     float x = 0;
     float y = 0;
     float z = 0;
@@ -44,6 +48,13 @@ struct Position {
         y = y_;
         z = z_;
     }
+};
+
+struct ImageIndex : Cached {
+    size_t x = 0;
+    size_t y = 0;
+    bool valid = false;
+    ImageIndex(){};
 };
 
 class ControllerState {

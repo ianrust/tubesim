@@ -14,6 +14,11 @@ class MappingConfig {
 public:
     // global settings
     size_t leds_per_channel = 700;
+    size_t total_leds = 8*leds_per_channel;
+
+    // caches
+    Position addressToCartesianPoint_cache[5600];
+    ImageIndex addressToImageIndex_cache[5600];
 
     float pitch_length = 20.0;
     float pitch_width = 15.0;
@@ -58,100 +63,123 @@ public:
         positions[4] = Position(pitch_length_half, goal_width_half);
         positions[5] = Position(pitch_length_half, -goal_width_half);
         positions[6] = Position(-1, 0); // line direction
+
+        // initalize caches
+        for (size_t i = 0; i < total_leds; i++) {
+            addressToCartesianPoint_cache[i] = Position();
+            addressToImageIndex_cache[i] = ImageIndex();
+        }
     }
 
-    bool isGoal(size_t address) const {
+    bool isGoal(size_t address) {
         return channels[int(address / leds_per_channel)] == ChannelType::GOALPOST;
     }
 
-    bool isLine(size_t address) const {
+    bool isLine(size_t address) {
         return channels[int(address / leds_per_channel)] == ChannelType::LINES;
     }
 
-    ChannelType getChannelType(size_t channel) const {
+    ChannelType getChannelType(size_t channel) {
         return channels[channel];
     }
 
-    Position getPosition(size_t channel) const {
+    Position getPosition(size_t channel) {
         return positions[channel];
     }
 
     //assumes all LEDs are in 1 group for each pole
-    //removes last 5 address on each shortened strip
-    void addressToImageIndex(size_t address, size_t& x, size_t& y, bool& valid) const {
-        size_t cropped_address = address % leds_per_channel;
-        size_t gap = 0;
-        size_t low = goal_led_strip_length_cropped;
-        for (; (low < addresses_per_goal); low+=2*goal_led_strip_length) {
-            if (cropped_address < low) {
-                break;
-            } else if (cropped_address < (low+num_goal_leds_excluded_double)) {
-                valid = false;
-                return;
-            }
-            gap+=num_goal_leds_excluded_double;
-        }
-
-        cropped_address -= gap;
-
-        valid = true;
-        x = (address % addresses_per_goal) / goal_led_strip_length;
-        if (x % 2 == 0) {
-            y = (cropped_address % goal_led_strip_length_cropped);
+    //removes last config-defined address on each shortened strip
+    ImageIndex addressToImageIndex(size_t address) {
+        if (addressToImageIndex_cache[address].cached) {
+            return addressToImageIndex_cache[address];
         } else {
-            y = (goal_led_strip_length_cropped - 1) -
-                (cropped_address % goal_led_strip_length_cropped);
-         }
+            ImageIndex out_index;
+            size_t cropped_address = address % leds_per_channel;
+            size_t gap = 0;
+            size_t low = goal_led_strip_length_cropped;
+            for (; (low < addresses_per_goal); low+=2*goal_led_strip_length) {
+                if (cropped_address < low) {
+                    break;
+                } else if (cropped_address < (low+num_goal_leds_excluded_double)) {
+                    out_index.valid = false;
+                    addressToImageIndex_cache[address] = out_index;
+                    addressToImageIndex_cache[address].cached = true;
+                    return out_index;
+                }
+                gap+=num_goal_leds_excluded_double;
+            }
+
+            cropped_address -= gap;
+
+            out_index.valid = true;
+            out_index.x = (address % addresses_per_goal) / goal_led_strip_length;
+            if (out_index.x % 2 == 0) {
+                out_index.y = (cropped_address % goal_led_strip_length_cropped);
+            } else {
+                out_index.y = (goal_led_strip_length_cropped - 1) -
+                    (cropped_address % goal_led_strip_length_cropped);
+            }
+
+            addressToImageIndex_cache[address] = out_index;
+            addressToImageIndex_cache[address].cached = true;
+
+            return out_index;
+        }
     } 
  
-    //a ssumes all LEDs are in 1 group for each pole, 12 strips
+    // assumes all LEDs are in 1 group for each pole, 12 strips
     //  TODO add position of pixel around the pole
-    void addressToCartesianPoint(size_t address, float& x_cart, float& y_cart, float& z_cart) const {
-        size_t x_image = 0;
-        size_t y_image = 0;
-        bool valid;
-        size_t channel_index = address / leds_per_channel;
-        // for goals
-        if (isGoal(address)) {
-            addressToImageIndex(address, x_image, y_image, valid);
-            // TODO add radius here
-            x_cart = positions[channel_index].x;
-            y_cart = positions[channel_index].y;
-            z_cart = y_image * pixel_height;
-        } else { //for lines
-            size_t progressIndex = address % leds_per_channel;
-            int side = positions[channel_index].x;
-            if (progressIndex < 200) {
-                x_cart = side * float(progressIndex) * pixel_length;
-                y_cart = (pitch_width_half);
-            } else if (progressIndex < 500) {
-                x_cart = side*(pitch_length_half); 
-                y_cart = (pitch_width_half) - (progressIndex+1 - 200) * pixel_length; 
-            } else {
-                x_cart = side*((pitch_length_half) - (progressIndex+1 - 500) * pixel_length); 
-                y_cart = -(pitch_width_half); 
+    Position addressToCartesianPoint(size_t address) {
+        if (addressToCartesianPoint_cache[address].cached) {
+            return addressToCartesianPoint_cache[address];
+        } else {
+            Position out_position;
+
+            size_t channel_index = address / leds_per_channel;
+            // for goals
+            if (isGoal(address)) {
+                ImageIndex image_index = addressToImageIndex(address);
+                // TODO add radius here
+                out_position.x = positions[channel_index].x;
+                out_position.y = positions[channel_index].y;
+                out_position.z = image_index.y * pixel_height;
+            } else { //for lines
+                size_t progressIndex = address % leds_per_channel;
+                int side = positions[channel_index].x;
+                if (progressIndex < 200) {
+                    out_position.x = side * float(progressIndex) * pixel_length;
+                    out_position.y = (pitch_width_half);
+                } else if (progressIndex < 500) {
+                    out_position.x = side*(pitch_length_half);
+                    out_position.y = (pitch_width_half) - (progressIndex+1 - 200) * pixel_length;
+                } else {
+                    out_position.x = side*((pitch_length_half) - (progressIndex+1 - 500) * pixel_length);
+                    out_position.y = -(pitch_width_half);
+                }
+                out_position.z = 0;
             }
-            z_cart = 0;
+
+            addressToCartesianPoint_cache[address] = out_position;
+            addressToCartesianPoint_cache[address].cached = true;
+
+            return out_position;
         }
     }
 
     // num_wraps around the pole interpolated b/w 2 colors (parametrizes by ratio). wrapps on speed
     // which is in m/(offset index). offset is usually state.tick but you decide!
-    void addressToLighthausParameter(size_t address, float num_wraps, float speed, size_t offset, float& ratio) const {
-        size_t x_image, y_image;
-        bool valid;
+    void addressToLighthausParameter(size_t address, float num_wraps, float speed, size_t offset, float& ratio) {
         float progress;
         // progress is the meter distance from midline to top of pole, manhattan distance;
         if (isGoal(address)) {
-            addressToImageIndex(address, x_image, y_image, valid);
-            progress = y_image * pixel_height + pitch_length_half;
+            ImageIndex image_index = addressToImageIndex(address);
+            progress = image_index.y * pixel_height + pitch_length_half;
         } else if (isLine(address)) {
-            float x_cart, y_cart, z_cart;
-            addressToCartesianPoint(address, x_cart, y_cart, z_cart);
-            if (x_cart < 0) {
-                progress = -x_cart;
+            Position position = addressToCartesianPoint(address);
+            if (position.x < 0) {
+                progress = -position.x;
             } else {
-                progress = x_cart;
+                progress = position.x;
             }
         }
         float period = (pitch_length_half + goal_led_strip_length_cropped*pixel_height) / num_wraps;
@@ -175,11 +203,10 @@ public:
         size_t offset,
         const Position& direction,
         float& ratio
-        ) const {
+        ) {
 
-        float x_cart, y_cart, z_cart;
-        addressToCartesianPoint(address, x_cart, y_cart, z_cart);
-        float progress = x_cart * direction.x + y_cart * direction.y + z_cart * direction.z;
+        Position position = addressToCartesianPoint(address);
+        float progress = position.x * direction.x + position.y * direction.y + position.z * direction.z;
 
         // fabs/fmod are slow
         progress -= speed*offset;
@@ -194,4 +221,4 @@ public:
 
 };
 
-const MappingConfig mapping_config;
+MappingConfig mapping_config;
