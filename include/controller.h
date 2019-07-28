@@ -13,9 +13,6 @@
 size_t ledIndex = 0;
 Color8bit color;
 
-const int ledsPerStrip = 700;
-const int numActiveAddresses = ledsPerStrip * 7;
-
 DMAMEM int displayMemory[ledsPerStrip*6];
 int drawingMemory[ledsPerStrip*6];
 
@@ -24,6 +21,8 @@ const int config = WS2811_GRB | WS2811_800kHz;
 OctoWS2811 leds(ledsPerStrip, displayMemory, drawingMemory, config);
 
 bool indicator = false;
+bool isGoal = false;
+bool isLine = false;
 
 ControllerState state;
 
@@ -45,20 +44,35 @@ void setup() {
   delay(100);
 }
 
+void writeColor(int ledIndex, Color8bit color) {
+    if (color == COLOR_MAP[ledIndex]) {
+      return;
+    }  
+    COLOR_MAP[ledIndex] = color;
+    leds.setPixel(ledIndex, gamma8[color.r], gamma8[color.b], gamma8[color.g]);
+}
+
 void loop() {
   state.update(!digitalRead(PIN_LEFT), !digitalRead(PIN_RIGHT), freq_out);
   for (ledIndex = 0; ledIndex < numActiveAddresses ; ledIndex++) {
     readFrequenciesTimed();
-    if (mapping_config.isGoal(ledIndex)) {
-      color = getGoalsColorPortable(ledIndex, state, freq_out);
-      leds.setPixel(ledIndex, gamma8[color.r], gamma8[color.b], gamma8[color.g]);
-    } else if (mapping_config.isLine(ledIndex)) {
-      color = getLinesColorPortable(ledIndex, state, freq_out);
-      leds.setPixel(ledIndex, gamma8[color.r], gamma8[color.b], gamma8[color.g]);
-    } else {
+
+    isGoal = mapping_config.isGoal(ledIndex);
+    isLine = mapping_config.isLine(ledIndex);
+    if (!isGoal && !isLine) {
       // skip inactive addresses
       ledIndex += mapping_config.leds_per_channel-1;
+      continue;
     }
+    
+    if (isGoal) {
+      color = getGoalsColorPortable(ledIndex, state, freq_out);
+    }
+
+    if (isLine) {
+      color = getLinesColorPortable(ledIndex, state, freq_out);
+    }
+    writeColor(ledIndex, color)
   }
   leds.show();
 

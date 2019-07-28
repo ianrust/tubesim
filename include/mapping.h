@@ -4,6 +4,11 @@
 #include "fastmath.h"
 #include "types.h"
 
+
+const int ledsPerStrip = 700;
+const int numActiveAddresses = ledsPerStrip * 7;
+Color8bit COLOR_MAP[numActiveAddresses];
+
 enum ChannelType {
     GOALPOST = 0,
     LINES = 1,

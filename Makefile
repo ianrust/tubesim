@@ -2,8 +2,11 @@ images:
 	cd images && python3 img_to_c.py && cd ..
 
 js:
-	. ~/emsdk/emsdk_env.sh && emcc --bind include/js_patterns.cpp -o js/patterns.js  -s "BINARYEN_TRAP_MODE='clamp'"
+	emcc --bind include/js_patterns.cpp -o js/patterns.js  -s "BINARYEN_TRAP_MODE='clamp'"
 
+source-js:
+	. ~/dev/src/github.com/emscripten-core/emsdk/emsdk_env.sh
+	
 server:
 	python3 -m http.server
 

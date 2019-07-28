@@ -9,6 +9,9 @@
 
 using namespace std;
 
+Color8bit RED = Color8bit(255, 0, 0);
+Color8bit YELLOW = Color8bit(255, 255, 0);
+
 /**
  * A test pattern to see ticks and sim working.
  */
@@ -18,6 +21,18 @@ Color8bit TestPattern(size_t address, ControllerState state, int16_t* freq) {
     int b = uint8_t(address + state.tick + 70) % 256;
     return Color8bit(r,g,b);
 }
+
+Color8bit Waves(size_t address, ControllerState state, int16_t* freq) {
+    Position pos = mapping_config.addressToCartesianPoint(address);
+    int16_t bass = freq[0];
+    float bass_percentage = float(bass) / float(32767);
+    float max_height = mapping_config.pixel_height * mapping_config.num_goal_leds_excluded_double;
+    if (bass_percentage * 1000 < pos.z) { 
+        return YELLOW;
+    }
+    return RED;
+}
+
 
 Color8bit testLightHausPattern(size_t address, ControllerState state, int16_t* freq) {
     float ratio;
@@ -33,6 +48,7 @@ Color8bit testLightHausPattern(size_t address, ControllerState state, int16_t* f
 //    - the address of the LED
 //    - the controller state
 Color8bit getGoalsColorPortable(size_t address, ControllerState state, int16_t* freq) {
+    return Waves(address, state, freq);
     ImageIndex image_index = mapping_config.addressToImageIndex(address);
     Position position = mapping_config.addressToCartesianPoint(address);
     if (!image_index.valid) {
