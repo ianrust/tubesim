@@ -45,10 +45,7 @@ void setup() {
 }
 
 void writeColor(int ledIndex, Color8bit color) {
-    if (color == COLOR_MAP[ledIndex]) {
-      return;
-    }  
-    COLOR_MAP[ledIndex] = color;
+    // COLOR_MAP[ledIndex] = color;
     leds.setPixel(ledIndex, gamma8[color.r], gamma8[color.b], gamma8[color.g]);
 }
 
@@ -72,7 +69,7 @@ void loop() {
     if (isLine) {
       color = getLinesColorPortable(ledIndex, state, freq_out);
     }
-    writeColor(ledIndex, color)
+    writeColor(ledIndex, color);
   }
   leds.show();
 

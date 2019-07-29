@@ -11,6 +11,7 @@ using namespace std;
 
 Color8bit RED = Color8bit(255, 0, 0);
 Color8bit YELLOW = Color8bit(255, 255, 0);
+Color8bit WHITE = Color8bit(255, 255, 255);
 
 /**
  * A test pattern to see ticks and sim working.
@@ -26,11 +27,12 @@ Color8bit Waves(size_t address, ControllerState state, int16_t* freq) {
     Position pos = mapping_config.addressToCartesianPoint(address);
     int16_t bass = freq[0];
     float bass_percentage = float(bass) / float(32767);
-    float max_height = mapping_config.pixel_height * mapping_config.num_goal_leds_excluded_double;
+    float max_height = mapping_config.pixel_height * mapping_config.goal_led_strip_length_cropped;
     if (bass_percentage * 1000 < pos.z) { 
         return YELLOW;
     }
-    return RED;
+    int16_t mid = freq[5];
+    return interpolate(RED, WHITE, (bass / mid) * (pos.z / max_height));
 }
 
 
