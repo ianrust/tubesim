@@ -1,6 +1,7 @@
 var Module = {
     onRuntimeInitialized: () => {
         Module.initializeTrigTables();
+        Module.initializePerlinMats();
 
         var container, stats;
 

@@ -15,7 +15,7 @@ struct ColorNormalized {
     }
 };
 
-ColorNormalized getGoalsColor(int address, ControllerState state, int16_t freq0,
+ColorNormalized getGoalsColor(size_t address, ControllerState state, int16_t freq0,
                                                                   int16_t freq1,
                                                                   int16_t freq2,
                                                                   int16_t freq3,
@@ -33,7 +33,7 @@ ColorNormalized getGoalsColor(int address, ControllerState state, int16_t freq0,
     return ColorNormalized(getGoalsColorPortable(address, state, freq_input));
 }
 
-ColorNormalized getLinesColor(int address, ControllerState state, int16_t freq0,
+ColorNormalized getLinesColor(size_t address, ControllerState state, int16_t freq0,
                                                                   int16_t freq1,
                                                                   int16_t freq2,
                                                                   int16_t freq3,
@@ -57,6 +57,8 @@ EMSCRIPTEN_BINDINGS(my_module) {
     emscripten::function("getLinesColor", &getLinesColor)
     ;
     emscripten::function("initializeTrigTables", &initializeTrigTables)
+    ;
+    emscripten::function("initializePerlinMats", &initializePerlinMats)
     ;
     emscripten::enum_<ChannelType>("ChannelType")
         .value("GOALPOST", ChannelType::GOALPOST)

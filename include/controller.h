@@ -38,6 +38,9 @@ void setup() {
   pinMode(PIN_LEFT, INPUT_PULLUP);
   pinMode(PIN_RIGHT, INPUT_PULLUP);
 
+  initializeTrigTables();
+  initializePerlinMats();
+
 #ifdef FPS
   Serial.begin(9600);
 #endif

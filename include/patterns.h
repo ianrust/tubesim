@@ -6,6 +6,7 @@
 #include "types.h"
 #include "fastmath.h"
 #include "images.h"
+#include "perlin.h"
 
 using namespace std;
 
@@ -40,13 +41,7 @@ Color8bit getGoalsColorPortable(size_t address, ControllerState state, int16_t* 
     }
     normalize255(freq);
     if (state.music_on) {
-        if (isClapping(freq)) {
-            return Color8bit(255, 255, 255);
-        } else {
-            return Color8bit(int(freq[0]*2*(address % 300) / 8),
-                             int((freq[1] + freq[2] + freq[3] + freq[4])/4*(address % 100)/16),
-                             int(freq[5]*(address % 45)));
-        }
+        return getPerlinColor(address, freq);
     } else {
         // only effect left/right adresses
         if (position.x > 0 && state.goal_right) {
@@ -80,8 +75,12 @@ Color8bit getGoalsColorPortable(size_t address, ControllerState state, int16_t* 
 }
 
 // same as above, though this is for lines
-Color8bit getLinesColorPortable(int address, ControllerState state, int16_t* freq) {
-    return testLightHausPattern(address, state, freq);
+Color8bit getLinesColorPortable(size_t& address, ControllerState state, int16_t* freq) {
+    if (state.music_on) {
+        return getPerlinColor(address, freq);
+    } else {
+        return testLightHausPattern(address, state, freq);
+    }
 
     // // crappy mod scroll example
     // float position.x, position.y, position.z;
