@@ -32,12 +32,13 @@ unsigned long last_frame_micros = 0;
 #endif
 
 void setup() {
+  initializeTrigTables();
+
   leds.begin();
 
   pinMode(LED_BUILTIN, OUTPUT);
   pinMode(PIN_LEFT, INPUT_PULLUP);
   pinMode(PIN_RIGHT, INPUT_PULLUP);
-
 #ifdef FPS
   Serial.begin(9600);
 #endif
