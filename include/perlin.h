@@ -27,6 +27,66 @@ void initializePerlinMats() {
     }
 }
 
+void rand2d(size_t mat_address, int16_t* freq, int16_t& x, int16_t& y) {
+    x = y = 0;
+    for (size_t mat_index = mat_address * 7; mat_index < (mat_address + 1) * 7; mat_index++) {
+        size_t spec_index = mat_index % 7;
+        if (ColorMats[mat_index]) {
+            uint8_t row = (mat_index - (mat_address * 7)) / 7;
+            if (row == 0) {
+                x += freq[spec_index];
+            } else if (row == 1) {
+                y += freq[spec_index];
+            }
+        }
+    }
+    x -= (100*7/2);
+    y -= (100*7/2);
+}
+
+int16_t dot2d(int16_t x1, int16_t y1, int16_t x2, int16_t y2) {
+    return (x1 * x2 + y1 * y2);
+}
+
+int16_t twoDPerlin(ImageIndex image_index, int16_t* freq, size_t offset) {
+    size_t mat_address = image_index.x / GOAL_RADIAL_BINS + 3 * (image_index.y / GOAL_VERT_BINS);
+
+    int16_t x_vertex = image_index.x % GOAL_RADIAL_BINS;
+    int16_t y_vertex = image_index.y % GOAL_VERT_BINS;
+
+    int16_t x_bottom_left, y_bottom_left;
+    int16_t x_top_left, y_top_left;
+    int16_t x_bottom_right, y_bottom_right;
+    int16_t x_top_right, y_top_right;
+
+    rand2d(offset + mat_address, freq, x_bottom_left, y_bottom_left);
+    rand2d(offset + mat_address+3, freq, x_top_left, y_top_left);
+
+    // handle wrapping
+    if (mat_address % GOAL_RADIAL_BINS == 0) {
+        rand2d(offset + mat_address-2, freq, x_bottom_right, y_bottom_right);
+        rand2d(offset + mat_address+1, freq, x_top_right, y_top_right);
+    } else {
+        rand2d(offset + mat_address+1, freq, x_bottom_right, y_bottom_right);
+        rand2d(offset + mat_address+4, freq, x_top_right, y_top_right);
+    }
+
+    float x_ratio = float(x_vertex) / GOAL_RADIAL_BINS;
+    float y_ratio = float(y_vertex) / GOAL_VERT_BINS;
+
+    int16_t scale = 1;
+
+    int16_t influence_bottom_left = dot2d(x_bottom_left, y_bottom_left, x_vertex, y_vertex) / scale;
+    int16_t influence_top_left = dot2d(x_top_left, y_top_left, x_vertex, y_vertex - GOAL_VERT_BINS) / scale;
+    int16_t influence_bottom_right = dot2d(x_bottom_right, y_bottom_right, x_vertex - GOAL_RADIAL_BINS, y_vertex) / scale;
+    int16_t influence_top_right = dot2d(x_top_right, y_top_right, x_vertex - GOAL_RADIAL_BINS, y_vertex - GOAL_VERT_BINS) / scale;
+
+    int16_t left = influence_bottom_left * (1-y_ratio) + influence_top_left * y_ratio;
+    int16_t right = influence_bottom_right * (1-y_ratio) + influence_top_right * y_ratio;
+
+    return (left * (1-x_ratio) + right * x_ratio)+100;
+}
+
 Color8bit randColor(size_t mat_address, int16_t* freq) {
     int16_t red;
     int16_t green;
@@ -37,7 +97,7 @@ Color8bit randColor(size_t mat_address, int16_t* freq) {
             uint8_t row = (mat_index - (mat_address * 7 * 3)) / 7;
             int16_t offset = 0;
             if (spec_index == 5 || spec_index == 6) {
-                offset = 1205;
+                offset = 125;
             }
             if (row == 0) {
                 red += freq[spec_index] + offset;
@@ -63,39 +123,21 @@ Color8bit randColor(size_t mat_address, int16_t* freq) {
 }
 
 Color8bit getPerlinColor(size_t& address, int16_t* freq) {
-    size_t mat_address;
     if (mapping_config.isGoal(address)) {
         ImageIndex image_index = mapping_config.addressToImageIndex(address);
         if (!image_index.valid) {
             return Color8bit(0, 0, 0);
         }
-        mat_address = image_index.x / GOAL_RADIAL_BINS + 3 * (image_index.y / GOAL_VERT_BINS);
 
-        Color8bit c_bottom_left = randColor(7*3*(mat_address), freq);
-        Color8bit c_top_left = randColor(7*3*(mat_address+3), freq);
+        int16_t red = twoDPerlin(image_index, freq, 0);
+        int16_t green = twoDPerlin(image_index, freq, 20);
+        int16_t blue = twoDPerlin(image_index, freq, 40);
 
-        Color8bit c_bottom_right;
-        Color8bit c_top_right;
-
-        // handle wrapping
-        if (mat_address % GOAL_RADIAL_BINS == 4) {
-            c_bottom_right = randColor(7*3*(mat_address - 2), freq);
-            c_top_right= randColor(7*3*(mat_address + 1), freq);
-        } else {
-            c_bottom_right = randColor(7*3*(mat_address+1), freq);
-            c_top_right= randColor(7*3*(mat_address+4), freq);
-        }
-
-        float ratio_x = float(image_index.x % GOAL_RADIAL_BINS) / GOAL_RADIAL_BINS;
-        float ratio_y = float(image_index.y % GOAL_VERT_BINS) / GOAL_VERT_BINS;
-
-        Color8bit c_left = interpolate(c_bottom_left, c_top_left, ratio_y);
-        Color8bit c_right = interpolate(c_bottom_right, c_top_right, ratio_y);
-        return interpolate(c_left, c_right, ratio_x);
+        return Color8bit(red, green, blue);
     } else {
-        mat_address = (address % mapping_config.leds_per_channel) / LINES_BINS + 7*20;
-        Color8bit c1 = randColor(7*3*(mat_address), freq);
-        Color8bit c2 = randColor(7*3*(mat_address+1), freq);
+        size_t mat_address = (address % mapping_config.leds_per_channel) / LINES_BINS + 7*20;
+        Color8bit c1 = randColor(mat_address, freq);
+        Color8bit c2 = randColor(mat_address+1, freq);
         float ratio_line = float(address % LINES_BINS) / LINES_BINS;
         return interpolate(c1, c2, ratio_line);
     }
