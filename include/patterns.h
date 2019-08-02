@@ -33,17 +33,18 @@ Color8bit testLightHausPattern(size_t address, ControllerState state, int16_t* f
 // The main color function, takes in:
 //    - the address of the LED
 //    - the controller state
-Color8bit getGoalsColorPortable(size_t address, ControllerState state, int16_t* freq) {
+Color8bit getGoalsColorPortable(size_t address, ControllerState state, FreqBuffer& freq_buffer) {
     ImageIndex image_index = mapping_config.addressToImageIndex(address);
     Position position = mapping_config.addressToCartesianPoint(address);
     if (!image_index.valid) {
         return Color8bit(0, 0, 0);
     }
-    normalize255(freq);
+
+//    normalize255(freq);
     if (state.music_on) {
-        return getPerlinColor(address, freq);
+        return randColor((image_index.x + state.tick/2) % mapping_config.num_strips, freq_buffer.getArray(image_index.y));
     } else {
-        // only effect left/right adresses
+        // only effect left/right addresses
         if (position.x > 0 && state.goal_right) {
             // image display example
             size_t x_offset = (state.tick/2);
@@ -64,29 +65,15 @@ Color8bit getGoalsColorPortable(size_t address, ControllerState state, int16_t* 
         }
 
         // ratio example
-        return testLightHausPattern(address, state, freq);
-
-        // // gradient block
-        // int g = int(255.0*(position.z)/5.0)*0;
-        // int b = int(255.0*(position.x+10.0)/20.0);
-        // int r = 255-b;
-        // return Color8bit(r, g, b);
+        return testLightHausPattern(address, state, freq_buffer.getArray(0));
     }
 }
 
 // same as above, though this is for lines
-Color8bit getLinesColorPortable(size_t& address, ControllerState state, int16_t* freq) {
+Color8bit getLinesColorPortable(size_t& address, ControllerState state, FreqBuffer& freq_buffer) {
     if (state.music_on) {
-        return getPerlinColor(address, freq);
+        return getPerlinColor(address, freq_buffer.getArray(0));
     } else {
-        return testLightHausPattern(address, state, freq);
+        return testLightHausPattern(address, state, freq_buffer.getArray(0));
     }
-
-    // // crappy mod scroll example
-    // float position.x, position.y, position.z;
-    // mapping_config.addressToCartesianPoint(address, position.x, position.y, position.z);
-    // int r = int(255.0*fabs(position.y+state.tick/3)/(mapping_config.pitch_width_half)) % 255;
-    // int g = int(255.0*fabs(position.x+state.tick/3)/(mapping_config.pitch_length_half)) % 255;
-    // int b = 255-r;
-    // return Color8bit(r, g, b);
 }

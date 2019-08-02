@@ -47,6 +47,7 @@ public:
     float pixel_height = 0.1;
     float goal_width_half = 2.5;
     float radius = 0.1;
+    size_t num_strips = 6;
 
     // line settings
     float pixel_length = 0.05;

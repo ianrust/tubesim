@@ -1,5 +1,7 @@
 #pragma once
 
+#include "freq_buffer.h"
+
 // 63Hz, 160Hz, 400Hz, 1kHz, 2.5kHz, 6.25kHz, 16kHz
 float Bands[7] = {63.0, 160.0, 400.0, 1000.0, 2500.0, 6250.0, 16000.0};
 
@@ -95,6 +97,7 @@ void readFrequenciesTimed() {
         last_spectrum_read_micros += spectrum_read_period_micros;
         readFrequencies();
         filterFrequencies();
+        freq_buffer.accumulate(freq_out);
 
         for (freq_amp = 0; freq_amp<7; freq_amp++) {
             freq_out[freq_amp] = lpf_output[freq_amp];
