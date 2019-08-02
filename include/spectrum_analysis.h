@@ -17,7 +17,7 @@ void normalize255(int16_t* freq) {
 }
 
 bool isClapping(int16_t* freq) {
-    for (int i = 0; i < 7; i++) {
+    for (int i = 0; i < 6; i++) {
         if (freq[i] > freq[6]) {
             return false;
         }

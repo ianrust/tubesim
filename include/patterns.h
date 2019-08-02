@@ -23,9 +23,9 @@ Color8bit TestPattern(size_t address, ControllerState state, int16_t* freq) {
 Color8bit testLightHausPattern(size_t address, ControllerState state, int16_t* freq) {
     float ratio;
     float theta = fmodFast(state.tick * 0.03, 2*M_PI);
-    mapping_config.addressToLighthausParameterCartesian(address, 3, 0.1, state.tick, Position(cosFast(theta), sinFast(theta), 0), ratio);
-//    mapping_config.addressToLighthausParameter(address, 0.5, 0.1, state.tick, ratio);
-    return interpolate(Color8bit(138, 43, 226), Color8bit(0, 255, 0), ratio);
+//    mapping_config.addressToLighthausParameterCartesian(address, 3, 0.1, state.tick, Position(cosFast(theta), sinFast(theta), 0), ratio);
+    mapping_config.addressToLighthausParameter(address, 0.5, 0.1, state.tick, ratio);
+    return interpolate(Color8bit(138, 43, 226), Color8bit(255, 182, 93), ratio);
 }
 
 // This will also take in the frequency information as well as any other inputs/state 
@@ -40,9 +40,17 @@ Color8bit getGoalsColorPortable(size_t address, ControllerState state, FreqBuffe
         return Color8bit(0, 0, 0);
     }
 
-//    normalize255(freq);
-    if (state.music_on) {
-        return randColor((image_index.x + state.tick/2) % mapping_config.num_strips, freq_buffer.getArray(image_index.y));
+//    normalize255(freq_buffer.getArray(image_index.y));
+    if (true) {
+//        if (isClapping(freq_buffer.getArray(0))) {
+//            return Color8bit(255, 255, 255);
+//        } else {
+            size_t distance_from_center = (image_index.y > mapping_config.goal_led_strip_length_cropped/2) ?
+                                            image_index.y - mapping_config.goal_led_strip_length_cropped/2 :
+                                            mapping_config.goal_led_strip_length_cropped/2 - image_index.y;
+            Color8bit spec_color = randColor((image_index.x + 0*state.tick/2) % mapping_config.num_strips, freq_buffer.getArray(distance_from_center));
+            return interpolate(spec_color, Color8bit(0,0,0), float(distance_from_center*3)/(sum(freq_buffer.getArray(0))));
+//        }
     } else {
         // only effect left/right addresses
         if (position.x > 0 && state.goal_right) {
@@ -72,7 +80,11 @@ Color8bit getGoalsColorPortable(size_t address, ControllerState state, FreqBuffe
 // same as above, though this is for lines
 Color8bit getLinesColorPortable(size_t& address, ControllerState state, FreqBuffer& freq_buffer) {
     if (state.music_on) {
-        return getPerlinColor(address, freq_buffer.getArray(0));
+        if (isClapping(freq_buffer.getArray(0))) {
+            return Color8bit(255, 255, 255);
+        } else {
+            return getPerlinColor(address, freq_buffer.getArray(0));
+        }
     } else {
         return testLightHausPattern(address, state, freq_buffer.getArray(0));
     }

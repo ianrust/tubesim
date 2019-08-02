@@ -17,7 +17,7 @@ int16_t tare_left[7];
 int16_t tare_right[7];
 float raw_mixed[7];
 
-float lpf_alpha[7] = {0.05, 0.05, 0.05, 0.05, 0.05, 0.05, 0.05};
+float lpf_alpha[7] = {0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1};
 float lpf_output[7] = {0, 0, 0, 0, 0, 0, 0};
 
 int16_t freq_out[7];
@@ -91,7 +91,7 @@ void filterFrequencies() {
     }
 }
 
-void readFrequenciesTimed() {
+void readFrequenciesTimed(FreqBuffer& freq_buffer) {
     current_micros = micros();
     if (current_micros - last_spectrum_read_micros > spectrum_read_period_micros) {
         last_spectrum_read_micros += spectrum_read_period_micros;

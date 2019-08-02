@@ -54,7 +54,7 @@ void loop() {
   state.update(!digitalRead(PIN_LEFT), !digitalRead(PIN_RIGHT), freq_out);
   freq_buffer.save();
   for (ledIndex = 0; ledIndex < numActiveAddresses ; ledIndex++) {
-    readFrequenciesTimed();
+    readFrequenciesTimed(freq_buffer);
     if (mapping_config.isGoal(ledIndex)) {
       color = getGoalsColorPortable(ledIndex, state, freq_buffer);
       leds.setPixel(ledIndex, gamma8[color.r], gamma8[color.b], gamma8[color.g]);
