@@ -5,6 +5,7 @@
 #ifndef RECORD
 #include "patterns.h"
 #include "gamma.h"
+#include "day_time.h"
 #include <OctoWS2811.h>
 
 #define PIN_LEFT 33
@@ -26,12 +27,14 @@ OctoWS2811 leds(ledsPerStrip, displayMemory, drawingMemory, config);
 bool indicator = false;
 
 ControllerState state;
+Time current_time;
 
 #ifdef FPS
 unsigned long last_frame_micros = 0;
 #endif
 
 void setup() {
+  current_time.init();
   initializeTrigTables();
 
   leds.begin();
@@ -73,8 +76,7 @@ void loop() {
 
   // slow indicator loop
   if (state.tick % 10 == 0) {
-    indicator = !indicator;
-    digitalWrite(LED_BUILTIN, indicator);
+    digitalWrite(LED_BUILTIN, current_time.seconds() % 2);
   }
 }
 #else
