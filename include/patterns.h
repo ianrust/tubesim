@@ -66,9 +66,9 @@ Color8bit getGoalsColorPortable(size_t address, ControllerState state, int16_t* 
         float goal_ratio_left, goal_ratio_right;
         state.getGoalTimeRatio(goal_ratio_left, goal_ratio_right);
         // only effect left/right adresses
-        if (position.x > 0 && state.goal_right) {
+        if (state.goal_right) {
             return explode(address, position, Position(mapping_config.pitch_length/2.0, 0, 0), goal_ratio_right);
-        } else if (position.x < 0 && state.goal_left) {
+        } else if (state.goal_left) {
 
             return explode(address, position, Position(-mapping_config.pitch_length/2.0, 0, 0), goal_ratio_left);
 
@@ -98,11 +98,11 @@ Color8bit getGoalsColorPortable(size_t address, ControllerState state, int16_t* 
 // same as above, though this is for lines
 Color8bit getLinesColorPortable(int address, ControllerState state, int16_t* freq) {
     Position position = mapping_config.addressToCartesianPoint(address);
-    if (position.x > 0 && state.goal_right) {
+    if (state.goal_right) {
         float goal_ratio_left, goal_ratio_right;
         state.getGoalTimeRatio(goal_ratio_left, goal_ratio_right);
         return explode(address, position, Position(mapping_config.pitch_length/2.0, 0, 0), goal_ratio_right);
-    } else if (position.x < 0 && state.goal_left) {
+    } else if (state.goal_left) {
         float goal_ratio_left, goal_ratio_right;
         state.getGoalTimeRatio(goal_ratio_left, goal_ratio_right);
         return explode(address, position, Position(-mapping_config.pitch_length/2.0, 0, 0), goal_ratio_left);
