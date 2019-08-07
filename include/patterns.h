@@ -22,9 +22,24 @@ Color8bit TestPattern(size_t address, ControllerState state, int16_t* freq) {
 Color8bit testLightHausPattern(size_t address, ControllerState state, int16_t* freq) {
     float ratio;
     float theta = fmodFast(state.tick * 0.03, 2*M_PI);
-    mapping_config.addressToLighthausParameterCartesian(address, 3, 0.1, state.tick, Position(cosFast(theta), sinFast(theta), 0), ratio);
-//    mapping_config.addressToLighthausParameter(address, 0.5, 0.1, state.tick, ratio);
+//    mapping_config.addressToLighthausParameterCartesian(address, 3, 0.1, state.tick, Position(cosFast(theta), sinFast(theta), 0), ratio);
+    mapping_config.addressToLighthausParameter(address, 0.5, 0.1, state.tick, ratio);
     return interpolate(Color8bit(138, 43, 226), Color8bit(0, 255, 0), ratio);
+}
+
+Color8bit explode(size_t address, Position position, Position origin, float ratio) {
+    float dx = position.x - origin.x;
+    float dy = position.y - origin.y;
+    float dz = position.z - origin.z;
+    float distance_from_base_squared = dx*dx + dy*dy + dz*dz;
+    float max_distance_squared = mapping_config.pitch_length_half * mapping_config.pitch_length_half;
+    float my_ratio = pow(distance_from_base_squared / max_distance_squared, 0.2);
+    if (ratio > my_ratio) {
+        return Color8bit(uint8_t(255*rand())%255, uint8_t(255*rand())%255, uint8_t(255*rand())%255);
+    } else {
+        float front_progress = 0.1*(my_ratio - ratio) / (1-ratio);
+        return Color8bit(uint8_t(255*front_progress*rand())%255, uint8_t(255*front_progress*rand())%255, uint8_t(255*front_progress*rand())%255);
+    }
 }
 
 // This will also take in the frequency information as well as any other inputs/state 
@@ -48,24 +63,25 @@ Color8bit getGoalsColorPortable(size_t address, ControllerState state, int16_t* 
                              int(freq[5]*(address % 45)));
         }
     } else {
+        float goal_ratio_left, goal_ratio_right;
+        state.getGoalTimeRatio(goal_ratio_left, goal_ratio_right);
         // only effect left/right adresses
         if (position.x > 0 && state.goal_right) {
-            // image display example
-            size_t x_offset = (state.tick/2);
-            size_t y_offset = 0*(state.tick/2); // zero removes the scroll in that direction
-
-            return getImageColor(pixel_triangles, address, x_offset, y_offset, false, true);
+            return explode(address, position, Position(mapping_config.pitch_length/2.0, 0, 0), goal_ratio_right);
         } else if (position.x < 0 && state.goal_left) {
-            // Mixing example
-            size_t x_offset = (state.tick / 12);
 
-            Color8bit image_color = getImageColor(organic, address, x_offset, 0, true, true);
+            return explode(address, position, Position(-mapping_config.pitch_length/2.0, 0, 0), goal_ratio_left);
 
-            Position position = mapping_config.addressToCartesianPoint(address);
-            int grad_level = position.z * 255 / 5;
-            float brightness = float(image_color.r + image_color.g + image_color.b) / (3.0 * 255.0);
-
-            return Color8bit(int(grad_level), int((255-grad_level)*brightness), int((1.0-brightness)*255));
+//            // Mixing example
+//            size_t x_offset = (state.tick / 12);
+//
+//            Color8bit image_color = getImageColor(organic, address, x_offset, 0, true, true);
+//
+//            Position position = mapping_config.addressToCartesianPoint(address);
+//            int grad_level = position.z * 255 / 5;
+//            float brightness = float(image_color.r + image_color.g + image_color.b) / (3.0 * 255.0);
+//
+//            return Color8bit(int(grad_level), int((255-grad_level)*brightness), int((1.0-brightness)*255));
         }
 
         // ratio example
@@ -81,7 +97,18 @@ Color8bit getGoalsColorPortable(size_t address, ControllerState state, int16_t* 
 
 // same as above, though this is for lines
 Color8bit getLinesColorPortable(int address, ControllerState state, int16_t* freq) {
-    return testLightHausPattern(address, state, freq);
+    Position position = mapping_config.addressToCartesianPoint(address);
+    if (position.x > 0 && state.goal_right) {
+        float goal_ratio_left, goal_ratio_right;
+        state.getGoalTimeRatio(goal_ratio_left, goal_ratio_right);
+        return explode(address, position, Position(mapping_config.pitch_length/2.0, 0, 0), goal_ratio_right);
+    } else if (position.x < 0 && state.goal_left) {
+        float goal_ratio_left, goal_ratio_right;
+        state.getGoalTimeRatio(goal_ratio_left, goal_ratio_right);
+        return explode(address, position, Position(-mapping_config.pitch_length/2.0, 0, 0), goal_ratio_left);
+    } else {
+        return testLightHausPattern(address, state, freq);
+    }
 
     // // crappy mod scroll example
     // float position.x, position.y, position.z;
