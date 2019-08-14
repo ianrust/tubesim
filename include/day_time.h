@@ -4,9 +4,12 @@
 #include <string.h>
 #include <stdlib.h>
 
-class Time {
+#include "types.h"
+
+class Timer {
     public:
         void init();
+        Time now();
         uint8_t hours();
         uint8_t minutes();
         uint8_t seconds();
@@ -17,7 +20,7 @@ class Time {
         uint8_t init_seconds;
 };
 
-void Time::init()
+void Timer::init()
 {
     // hh:mm:ss
     char timestr[] = __TIME__;
@@ -36,7 +39,7 @@ unsigned long seconds_since_boot() {
 }
 
 // returns the hour of day, overflows every 50 days!
-uint8_t Time::hours() {
+uint8_t Timer::hours() {
     unsigned long delta = seconds_since_boot(); // total seconds elapsed
     unsigned long delta_minutes = delta / 60;   // total minutes elapsed
     unsigned long delta_hours = delta_minutes / 60; // total hours elapsed
@@ -48,7 +51,7 @@ uint8_t Time::hours() {
 }
 
 // returns the minute of the day, overflows every 50 days!
-uint8_t Time::minutes() {
+uint8_t Timer::minutes() {
     unsigned long delta = seconds_since_boot();
     unsigned long delta_minutes = delta / 60;
 
@@ -57,7 +60,15 @@ uint8_t Time::minutes() {
 }
 
 // returns the second of the day, overflows every 50 days!
-uint8_t Time::seconds() {
+uint8_t Timer::seconds() {
     unsigned long delta = seconds_since_boot();
     return (init_seconds + delta) % 60;
+}
+
+Time Timer::now() {
+    Time now;
+    now.seconds = seconds();
+    now.minutes = minutes();
+    now.hours = hours();
+    return now;
 }

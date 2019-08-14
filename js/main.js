@@ -41,6 +41,7 @@ var initializeButtons = function(goals) {
   const right = document.getElementById("right");
   const music = document.getElementById("music");
   const clear = document.getElementById("clear");
+  const timeOfDay = document.getElementById("timeOfDay");
 
   left.addEventListener('click', (e) => {
       goals.state.updateEvent(true, false);
@@ -58,5 +59,9 @@ var initializeButtons = function(goals) {
       goals.state.goal_left = false;
       goals.state.goal_right = false;
       goals.state.music_on = false;
+  });
+
+  timeOfDay.addEventListener('input', function() {
+      goals.state.now_stored = Module.timeFromDaySeconds(parseInt(timeOfDay.value));
   });
 }

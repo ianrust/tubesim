@@ -27,14 +27,14 @@ OctoWS2811 leds(ledsPerStrip, displayMemory, drawingMemory, config);
 bool indicator = false;
 
 ControllerState state;
-Time current_time;
+Timer timer;
 
 #ifdef FPS
 unsigned long last_frame_micros = 0;
 #endif
 
 void setup() {
-  current_time.init();
+  timer.init();
   initializeTrigTables();
 
   leds.begin();
@@ -50,7 +50,7 @@ void setup() {
 }
 
 void loop() {
-  state.update(!digitalRead(PIN_LEFT), !digitalRead(PIN_RIGHT), freq_out);
+  state.update(!digitalRead(PIN_LEFT), !digitalRead(PIN_RIGHT), freq_out, timer.now());
   for (ledIndex = 0; ledIndex < numActiveAddresses ; ledIndex++) {
     readFrequenciesTimed();
     if (mapping_config.isGoal(ledIndex)) {
@@ -76,7 +76,7 @@ void loop() {
 
   // slow indicator loop
   if (state.tick % 10 == 0) {
-    digitalWrite(LED_BUILTIN, current_time.seconds() % 2);
+    digitalWrite(LED_BUILTIN, timer.seconds() % 2);
   }
 }
 #else

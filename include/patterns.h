@@ -6,6 +6,7 @@
 #include "types.h"
 #include "fastmath.h"
 #include "images.h"
+#include "state.h"
 
 using namespace std;
 
@@ -21,10 +22,16 @@ Color8bit TestPattern(size_t address, ControllerState state, int16_t* freq) {
 
 Color8bit testLightHausPattern(size_t address, ControllerState state, int16_t* freq) {
     float ratio;
-    float theta = fmodFast(state.tick * 0.03, 2*M_PI);
+//    float theta = fmodFast(state.tick * 0.03, 2*M_PI);
 //    mapping_config.addressToLighthausParameterCartesian(address, 3, 0.1, state.tick, Position(cosFast(theta), sinFast(theta), 0), ratio);
     mapping_config.addressToLighthausParameter(address, 0.5, 0.1, state.tick, ratio);
     return interpolate(Color8bit(138, 43, 226), Color8bit(0, 255, 0), ratio);
+}
+
+Color8bit lightHausPattern(size_t address, ControllerState state, int16_t* freq) {
+    float ratio;
+    mapping_config.addressToLighthausParameter(address, state.schedule_datum.num_wraps, state.schedule_datum.speed, state.tick, ratio);
+    return interpolate(state.schedule_datum.color1, state.schedule_datum.color2, ratio);
 }
 
 Color8bit explode(size_t address, Position position, Position origin, float ratio) {
@@ -85,7 +92,7 @@ Color8bit getGoalsColorPortable(size_t address, ControllerState state, int16_t* 
         }
 
         // ratio example
-        return testLightHausPattern(address, state, freq);
+        return lightHausPattern(address, state, freq);
 
         // // gradient block
         // int g = int(255.0*(position.z)/5.0)*0;
@@ -107,7 +114,7 @@ Color8bit getLinesColorPortable(int address, ControllerState state, int16_t* fre
         state.getGoalTimeRatio(goal_ratio_left, goal_ratio_right);
         return explode(address, position, Position(-mapping_config.pitch_length/2.0, 0, 0), goal_ratio_left);
     } else {
-        return testLightHausPattern(address, state, freq);
+        return lightHausPattern(address, state, freq);
     }
 
     // // crappy mod scroll example
