@@ -58,10 +58,17 @@ EMSCRIPTEN_BINDINGS(my_module) {
     ;
     emscripten::function("initializeTrigTables", &initializeTrigTables)
     ;
+    emscripten::function("timeFromDaySeconds", &timeFromDaySeconds)
+    ;
     emscripten::enum_<ChannelType>("ChannelType")
         .value("GOALPOST", ChannelType::GOALPOST)
         .value("LINES", ChannelType::LINES)
         .value("NOTCONNECTED", ChannelType::NOTCONNECTED)
+        ;
+    emscripten::class_<Time>("Time")
+        .property("hours", &Time::hours)
+        .property("minutes", &Time::minutes)
+        .property("seconds", &Time::seconds)
         ;
     emscripten::class_<Position>("Position")
         .constructor<>()
@@ -91,6 +98,7 @@ EMSCRIPTEN_BINDINGS(my_module) {
     emscripten::class_<ControllerState>("ControllerState")
         .constructor<>()
         .property("tick", &ControllerState::tick)
+        .property("now_stored", &ControllerState::now_stored)
         .property("goal_left", &ControllerState::goal_left)
         .property("goal_right", &ControllerState::goal_right)
         .property("music_on", &ControllerState::music_on)
