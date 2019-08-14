@@ -101,8 +101,13 @@ public:
         updateEvent(button_left, button_right);
         updateOutputState();
     }
+
+    void getGoalTimeRatio(float& ratio_left, float& ratio_right) {
+        ratio_left = float(tick - last_tick_left) / goal_period;
+        ratio_right = float(tick - last_tick_right) / goal_period;
+    }
 private:
     uint32_t last_tick_left = 0;
     uint32_t last_tick_right = 0;
-    uint32_t goal_period = 60;
+    uint32_t goal_period = 30;
 };
