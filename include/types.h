@@ -116,8 +116,11 @@ float getRatio(const Time& now, const Time& time1, const Time& time2) {
 struct ScheduleDatum {
     Time time;
 
-    Color8bit color1;
-    Color8bit color2;
+    Color8bit left_color1;
+    Color8bit left_color2;
+
+    Color8bit right_color1;
+    Color8bit right_color2;
 
     float speed;
     float num_wraps;
@@ -149,8 +152,10 @@ ScheduleDatum interpolate(const ScheduleDatum& schedule_datum1, const ScheduleDa
     float ratio = getRatio(now, schedule_datum1.time, schedule_datum2.time);
     ScheduleDatum out = {
         .time = interpolate(schedule_datum1.time, schedule_datum2.time, ratio),
-        .color1 = interpolate(schedule_datum1.color1, schedule_datum2.color1, ratio),
-        .color2 = interpolate(schedule_datum1.color2, schedule_datum2.color2, ratio),
+        .left_color1 = interpolate(schedule_datum1.left_color1, schedule_datum2.left_color1, ratio),
+        .left_color2 = interpolate(schedule_datum1.left_color2, schedule_datum2.left_color2, ratio),
+        .right_color1 = interpolate(schedule_datum1.right_color1, schedule_datum2.right_color1, ratio),
+        .right_color2 = interpolate(schedule_datum1.right_color2, schedule_datum2.right_color2, ratio),
         .speed = interpolate(schedule_datum1.speed, schedule_datum2.speed, ratio),
         .num_wraps = interpolate(schedule_datum1.num_wraps, schedule_datum2.num_wraps, ratio),
     };

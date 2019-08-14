@@ -31,7 +31,12 @@ Color8bit testLightHausPattern(size_t address, ControllerState state, int16_t* f
 Color8bit lightHausPattern(size_t address, ControllerState state, int16_t* freq) {
     float ratio;
     mapping_config.addressToLighthausParameter(address, state.schedule_datum.num_wraps, state.schedule_datum.speed, state.tick, ratio);
-    return interpolate(state.schedule_datum.color1, state.schedule_datum.color2, ratio);
+    Position position = mapping_config.addressToCartesianPoint(address);
+    if (position.x < 0) {
+        return interpolate(state.schedule_datum.left_color1, state.schedule_datum.left_color2, ratio);
+    } else {
+        return interpolate(state.schedule_datum.right_color1, state.schedule_datum.right_color2, ratio);
+    }
 }
 
 Color8bit explode(size_t address, Position position, Position origin, float ratio) {
