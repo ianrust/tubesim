@@ -5,6 +5,7 @@
 #ifndef RECORD
 #include "patterns.h"
 #include "gamma.h"
+#include "day_time.h"
 #include <OctoWS2811.h>
 
 #define PIN_LEFT 33
@@ -26,6 +27,7 @@ OctoWS2811 leds(ledsPerStrip, displayMemory, drawingMemory, config);
 bool indicator = false;
 
 ControllerState state;
+Timer timer;
 
 FreqBuffer freq_buffer;
 
@@ -34,6 +36,7 @@ unsigned long last_frame_micros = 0;
 #endif
 
 void setup() {
+  timer.init();ables();
   initializeTrigTables();
   initializePerlinMats();
 
@@ -42,7 +45,6 @@ void setup() {
   pinMode(LED_BUILTIN, OUTPUT);
   pinMode(PIN_LEFT, INPUT_PULLUP);
   pinMode(PIN_RIGHT, INPUT_PULLUP);
-
 #ifdef FPS
   Serial.begin(9600);
 #endif
@@ -51,7 +53,7 @@ void setup() {
 }
 
 void loop() {
-  state.update(!digitalRead(PIN_LEFT), !digitalRead(PIN_RIGHT), freq_out);
+  state.update(!digitalRead(PIN_LEFT), !digitalRead(PIN_RIGHT), freq_out, timer.now());
   freq_buffer.save();
   for (ledIndex = 0; ledIndex < numActiveAddresses ; ledIndex++) {
     readFrequenciesTimed(freq_buffer);
@@ -74,12 +76,18 @@ void loop() {
   fps = 1000000.0 / fps;
   Serial.println(fps);
   last_frame_micros = micros();
+  Time now = timer.now();
+  Serial.print("Hour: ");
+  Serial.println(now.hours);
+  Serial.print("Minutes: ");
+  Serial.println(now.minutes);
+  Serial.print("Seconds: ");
+  Serial.println(now.seconds);
 #endif
 
   // slow indicator loop
   if (state.tick % 10 == 0) {
-    indicator = !indicator;
-    digitalWrite(LED_BUILTIN, indicator);
+    digitalWrite(LED_BUILTIN, timer.seconds() % 2);
   }
 }
 #else

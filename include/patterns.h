@@ -7,6 +7,7 @@
 #include "fastmath.h"
 #include "images.h"
 #include "perlin.h"
+#include "state.h"
 
 using namespace std;
 
@@ -22,10 +23,36 @@ Color8bit TestPattern(size_t address, ControllerState state, int16_t* freq) {
 
 Color8bit testLightHausPattern(size_t address, ControllerState state, int16_t* freq) {
     float ratio;
-    float theta = fmodFast(state.tick * 0.03, 2*M_PI);
+//    float theta = fmodFast(state.tick * 0.03, 2*M_PI);
 //    mapping_config.addressToLighthausParameterCartesian(address, 3, 0.1, state.tick, Position(cosFast(theta), sinFast(theta), 0), ratio);
     mapping_config.addressToLighthausParameter(address, 0.5, 0.1, state.tick, ratio);
     return interpolate(Color8bit(138, 43, 226), Color8bit(255, 182, 93), ratio);
+}
+
+Color8bit lightHausPattern(size_t address, ControllerState state, int16_t* freq) {
+    float ratio;
+    mapping_config.addressToLighthausParameter(address, state.schedule_datum.num_wraps, state.schedule_datum.speed, state.tick, ratio);
+    Position position = mapping_config.addressToCartesianPoint(address);
+    if (position.x < 0) {
+        return interpolate(state.schedule_datum.left_color1, state.schedule_datum.left_color2, ratio);
+    } else {
+        return interpolate(state.schedule_datum.right_color1, state.schedule_datum.right_color2, ratio);
+    }
+}
+
+Color8bit explode(size_t address, Position position, Position origin, float ratio) {
+    float dx = position.x - origin.x;
+    float dy = position.y - origin.y;
+    float dz = position.z - origin.z;
+    float distance_from_base_squared = dx*dx + dy*dy + dz*dz;
+    float max_distance_squared = mapping_config.pitch_length_half * mapping_config.pitch_length_half;
+    float my_ratio = pow(distance_from_base_squared / max_distance_squared, 0.2);
+    if (ratio > my_ratio) {
+        return Color8bit(uint8_t(255*rand())%255, uint8_t(255*rand())%255, uint8_t(255*rand())%255);
+    } else {
+        float front_progress = 0.1*(my_ratio - ratio) / (1-ratio);
+        return Color8bit(uint8_t(255*front_progress*rand())%255, uint8_t(255*front_progress*rand())%255, uint8_t(255*front_progress*rand())%255);
+    }
 }
 
 // This will also take in the frequency information as well as any other inputs/state 
@@ -41,7 +68,7 @@ Color8bit getGoalsColorPortable(size_t address, ControllerState state, FreqBuffe
     }
 
 //    normalize255(freq_buffer.getArray(image_index.y));
-    if (true) {
+    if (state.music_on) {
 //        if (isClapping(freq_buffer.getArray(0))) {
 //            return Color8bit(255, 255, 255);
 //        } else {
@@ -52,40 +79,63 @@ Color8bit getGoalsColorPortable(size_t address, ControllerState state, FreqBuffe
             return interpolate(spec_color, Color8bit(0,0,0), float(distance_from_center*3)/(sum(freq_buffer.getArray(0))));
 //        }
     } else {
-        // only effect left/right addresses
-        if (position.x > 0 && state.goal_right) {
-            // image display example
-            size_t x_offset = (state.tick/2);
-            size_t y_offset = 0*(state.tick/2); // zero removes the scroll in that direction
+        float goal_ratio_left, goal_ratio_right;
+        state.getGoalTimeRatio(goal_ratio_left, goal_ratio_right);
+        // only effect left/right adresses
+        if (state.goal_right) {
+            return explode(address, position, Position(mapping_config.pitch_length/2.0, 0, 0), goal_ratio_right);
+        } else if (state.goal_left) {
+            return explode(address, position, Position(-mapping_config.pitch_length/2.0, 0, 0), goal_ratio_left);
 
-            return getImageColor(pixel_triangles, address, x_offset, y_offset, false, true);
-        } else if (position.x < 0 && state.goal_left) {
-            // Mixing example
-            size_t x_offset = (state.tick / 12);
-
-            Color8bit image_color = getImageColor(organic, address, x_offset, 0, true, true);
-
-            Position position = mapping_config.addressToCartesianPoint(address);
-            int grad_level = position.z * 255 / 5;
-            float brightness = float(image_color.r + image_color.g + image_color.b) / (3.0 * 255.0);
-
-            return Color8bit(int(grad_level), int((255-grad_level)*brightness), int((1.0-brightness)*255));
+//            // Mixing example
+//            size_t x_offset = (state.tick / 12);
+//
+//            Color8bit image_color = getImageColor(organic, address, x_offset, 0, true, true);
+//
+//            Position position = mapping_config.addressToCartesianPoint(address);
+//            int grad_level = position.z * 255 / 5;
+//            float brightness = float(image_color.r + image_color.g + image_color.b) / (3.0 * 255.0);
+//
+//            return Color8bit(int(grad_level), int((255-grad_level)*brightness), int((1.0-brightness)*255));
         }
 
         // ratio example
-        return testLightHausPattern(address, state, freq_buffer.getArray(0));
+        return lightHausPattern(address, state, freq_buffer.getArray(0));
+
+        // // gradient block
+        // int g = int(255.0*(position.z)/5.0)*0;
+        // int b = int(255.0*(position.x+10.0)/20.0);
+        // int r = 255-b;
+        // return Color8bit(r, g, b);
     }
 }
 
 // same as above, though this is for lines
-Color8bit getLinesColorPortable(size_t& address, ControllerState state, FreqBuffer& freq_buffer) {
+Color8bit getLinesColorPortable(size_t address, ControllerState state, FreqBuffer& freq_buffer) {
+    Position position = mapping_config.addressToCartesianPoint(address);
     if (state.music_on) {
         if (isClapping(freq_buffer.getArray(0))) {
             return Color8bit(255, 255, 255);
         } else {
             return getPerlinColor(address, freq_buffer.getArray(0));
         }
+    } else if (state.goal_right) {
+        float goal_ratio_left, goal_ratio_right;
+        state.getGoalTimeRatio(goal_ratio_left, goal_ratio_right);
+        return explode(address, position, Position(mapping_config.pitch_length/2.0, 0, 0), goal_ratio_right);
+    } else if (state.goal_left) {
+        float goal_ratio_left, goal_ratio_right;
+        state.getGoalTimeRatio(goal_ratio_left, goal_ratio_right);
+        return explode(address, position, Position(-mapping_config.pitch_length/2.0, 0, 0), goal_ratio_left);
     } else {
-        return testLightHausPattern(address, state, freq_buffer.getArray(0));
+        return lightHausPattern(address, state, freq_buffer.getArray(0));
     }
+
+    // // crappy mod scroll example
+    // float position.x, position.y, position.z;
+    // mapping_config.addressToCartesianPoint(address, position.x, position.y, position.z);
+    // int r = int(255.0*fabs(position.y+state.tick/3)/(mapping_config.pitch_width_half)) % 255;
+    // int g = int(255.0*fabs(position.x+state.tick/3)/(mapping_config.pitch_length_half)) % 255;
+    // int b = 255-r;
+    // return Color8bit(r, g, b);
 }
