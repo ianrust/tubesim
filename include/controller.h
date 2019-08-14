@@ -72,6 +72,13 @@ void loop() {
   fps = 1000000.0 / fps;
   Serial.println(fps);
   last_frame_micros = micros();
+  Time now = timer.now();
+  Serial.print("Hour: ");
+  Serial.println(now.hours);
+  Serial.print("Minutes: ");
+  Serial.println(now.minutes);
+  Serial.print("Seconds: ");
+  Serial.println(now.seconds);
 #endif
 
   // slow indicator loop
