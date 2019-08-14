@@ -54,6 +54,10 @@ Time timeFromDaySeconds(int day_seconds) {
     };
 }
 
+uint32_t daySecondsFromTime(const Time& time) {
+    return time.hours*3600 + time.minutes * 60 + time.seconds;
+}
+
 Time interpolate(const Time& t1, const Time& t2, float ratio) {
     Time out = {
         .hours = interpolate(t1.hours, t2.hours, ratio),
@@ -67,28 +71,32 @@ Time interpolate(const Time& t1, const Time& t2, float ratio) {
 bool ahead(const Time& t1, const Time& t2) {
     if (t1.hours > t2.hours) {
         return false;
+    } else if (t1.hours < t2.hours) {
+        return true;
     } else if (t1.minutes > t2.minutes) {
         return false;
+    } else if (t1.minutes < t2.minutes) {
+        return true;
     } else if (t1.seconds > t2.seconds) {
         return false;
+    } else if (t1.seconds < t2.seconds) {
+        return true;
     } else {
         return true;
     }
 }
 
 float getRatioDumb(const Time& now, const Time& time1, const Time& time2) {
-    float ratio = float(now.hours - time1.hours) / (time2.hours -  time1.hours);
-    if ((time2.minutes -  time1.minutes) != 0) {
-        float minutes_ratio = float(now.minutes - time1.minutes) / (time2.minutes -  time1.minutes);
-        minutes_ratio /= 24.0;
-        ratio += minutes_ratio;
+    uint32_t now_seconds = daySecondsFromTime(now);
+    uint32_t time1_seconds = daySecondsFromTime(time1);
+    uint32_t time2_seconds = daySecondsFromTime(time2);
+    if (time2_seconds < time1_seconds) {
+        time2_seconds += 86400;
     }
-    if ((time2.seconds -  time1.seconds) != 0) {
-        float seconds_ratio = float(now.seconds - time1.seconds) / (time2.seconds -  time1.seconds);
-        seconds_ratio /= 24.0 * 60.0;
-        ratio += seconds_ratio;
+    if (now_seconds < time1_seconds) {
+        now_seconds += 86400;
     }
-    return ratio;
+    return float(now_seconds - time1_seconds) / (time2_seconds -  time1_seconds);
 }
 
 float getRatio(const Time& now, const Time& time1, const Time& time2) {
