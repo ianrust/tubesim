@@ -123,7 +123,7 @@ public:
         updateOutputState();
     }
 
-    void getGoalTimeRatio(float& ratio_left, float& ratio_right) {
+    void getGoalTimeRatio(float& ratio_left, float& ratio_right) const {
         ratio_left = float(tick - last_tick_left) / goal_period;
         ratio_right = float(tick - last_tick_right) / goal_period;
     }

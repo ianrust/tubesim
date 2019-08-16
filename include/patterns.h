@@ -13,14 +13,14 @@ using namespace std;
 /**
  * A test pattern to see ticks and sim working.
  */
-Color8bit TestPattern(size_t address, ControllerState state, int16_t* freq) {
+Color8bit TestPattern(const size_t& address, const ControllerState& state, int16_t* freq) {
     int r = uint8_t(address + state.tick + 130) % 256;
     int g = uint8_t(address + state.tick + (mapping_config.pitch_length_half)) % 256;
     int b = uint8_t(address + state.tick + 70) % 256;
     return Color8bit(r,g,b);
 }
 
-Color8bit testLightHausPattern(size_t address, ControllerState state, int16_t* freq) {
+Color8bit testLightHausPattern(const size_t& address, const ControllerState& state, int16_t* freq) {
     float ratio;
 //    float theta = fmodFast(state.tick * 0.03, 2*M_PI);
 //    mapping_config.addressToLighthausParameterCartesian(address, 3, 0.1, state.tick, Position(cosFast(theta), sinFast(theta), 0), ratio);
@@ -28,7 +28,7 @@ Color8bit testLightHausPattern(size_t address, ControllerState state, int16_t* f
     return interpolate(Color8bit(138, 43, 226), Color8bit(0, 255, 0), ratio);
 }
 
-Color8bit lightHausPattern(size_t address, ControllerState state, int16_t* freq) {
+Color8bit lightHausPattern(const size_t& address, const ControllerState& state, int16_t* freq) {
     float ratio;
     mapping_config.addressToLighthausParameter(address, state.schedule_datum.num_wraps, state.schedule_datum.speed, state.tick, ratio);
     Position position = mapping_config.addressToCartesianPoint(address);
@@ -56,7 +56,7 @@ Color8bit getRandomAnimation(const size_t& address, const ControllerState& state
     }
 };
 
-Color8bit explode(size_t address, Position position, Position origin, float ratio) {
+Color8bit explode(const size_t& address, const Position& position, const Position& origin, const float& ratio) {
     float dx = position.x - origin.x;
     float dy = position.y - origin.y;
     float dz = position.z - origin.z;
@@ -76,7 +76,7 @@ Color8bit explode(size_t address, Position position, Position origin, float rati
 // The main color function, takes in:
 //    - the address of the LED
 //    - the controller state
-Color8bit getGoalsColorPortable(size_t address, ControllerState state, int16_t* freq) {
+Color8bit getGoalsColorPortable(const size_t& address, const ControllerState& state, int16_t* freq) {
     ImageIndex image_index = mapping_config.addressToImageIndex(address);
     Position position = mapping_config.addressToCartesianPoint(address);
     if (!image_index.valid) {
@@ -112,7 +112,7 @@ Color8bit getGoalsColorPortable(size_t address, ControllerState state, int16_t* 
 }
 
 // same as above, though this is for lines
-Color8bit getLinesColorPortable(int address, ControllerState state, int16_t* freq) {
+Color8bit getLinesColorPortable(const size_t& address, const ControllerState& state, int16_t* freq) {
     Position position = mapping_config.addressToCartesianPoint(address);
     if (state.goal_right) {
         float goal_ratio_left, goal_ratio_right;
