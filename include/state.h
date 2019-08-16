@@ -3,7 +3,7 @@
 #include "types.h"
 #include "schedule.h"
 
-const size_t MAX_SAFE_RAND = 10000;
+const size_t MAX_SAFE_RAND = 100000;
 inline int safe_rand() {
     return rand() % MAX_SAFE_RAND;
 }
@@ -62,8 +62,8 @@ public:
 
     PostAnimation post_animations[8];
 
-    int threshold =  MAX_SAFE_RAND * 495 / 500;
-    int divisor = 55;
+    int threshold =  MAX_SAFE_RAND - 100;
+    int divisor = 250;
 
     void update(const size_t& tick) {
         for (size_t i = 0; i < 8; i++) {
