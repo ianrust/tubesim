@@ -175,6 +175,15 @@ struct FlashImage {
     }
 };
 
+struct Animation {
+    const FlashImage* flash_image;
+    size_t speed_divisor_x;
+    size_t speed_divisor_y;
+    bool x_forward;
+    bool y_forward;
+    float mask_prob;
+};
+
 struct Cached {
     bool cached = false;
 };

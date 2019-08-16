@@ -79,6 +79,10 @@ public:
         return channels[int(address / leds_per_channel)] == ChannelType::LINES;
     }
 
+    size_t getChannel(const size_t& address) {
+        return address / leds_per_channel;
+    }
+
     ChannelType getChannelType(size_t channel) {
         return channels[channel];
     }
@@ -182,7 +186,7 @@ public:
                 progress = position.x;
             }
         }
-        float period = (pitch_length_half + goal_led_strip_length_cropped*pixel_height) / num_wraps;
+        float period = (pitch_length_half + (goal_led_strip_length_cropped-1)*pixel_height) / num_wraps;
 
         // fabs/fmod are slow
         progress -= speed*offset;

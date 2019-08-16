@@ -39,6 +39,23 @@ Color8bit lightHausPattern(size_t address, ControllerState state, int16_t* freq)
     }
 }
 
+Color8bit getRandomAnimation(const size_t& address, const ControllerState& state, bool& actually_display) {
+    PostAnimation post_animation = state.animation_state.post_animations[mapping_config.getChannel(address)];
+    if (post_animation.active) {
+        actually_display = true;
+        if (post_animation.mask) {
+            Position position = mapping_config.addressToCartesianPoint(address);
+            float ratio = position.z / (mapping_config.pixel_height * mapping_config.goal_led_strip_length_cropped);
+            return getImageColor(post_animation.animation, address, state.tick, post_animation.color1, post_animation.color2, post_animation.color3, post_animation.color4, ratio);
+        } else {
+            return getImageColor(post_animation.animation, address, state.tick);
+        }
+    } else {
+        actually_display = false;
+        return Color8bit(0,0,0);
+    }
+};
+
 Color8bit explode(size_t address, Position position, Position origin, float ratio) {
     float dx = position.x - origin.x;
     float dy = position.y - origin.y;
@@ -81,29 +98,16 @@ Color8bit getGoalsColorPortable(size_t address, ControllerState state, int16_t* 
         if (state.goal_right) {
             return explode(address, position, Position(mapping_config.pitch_length/2.0, 0, 0), goal_ratio_right);
         } else if (state.goal_left) {
-
             return explode(address, position, Position(-mapping_config.pitch_length/2.0, 0, 0), goal_ratio_left);
-
-//            // Mixing example
-//            size_t x_offset = (state.tick / 12);
-//
-//            Color8bit image_color = getImageColor(organic, address, x_offset, 0, true, true);
-//
-//            Position position = mapping_config.addressToCartesianPoint(address);
-//            int grad_level = position.z * 255 / 5;
-//            float brightness = float(image_color.r + image_color.g + image_color.b) / (3.0 * 255.0);
-//
-//            return Color8bit(int(grad_level), int((255-grad_level)*brightness), int((1.0-brightness)*255));
         }
 
-        // ratio example
-        return lightHausPattern(address, state, freq);
-
-        // // gradient block
-        // int g = int(255.0*(position.z)/5.0)*0;
-        // int b = int(255.0*(position.x+10.0)/20.0);
-        // int r = 255-b;
-        // return Color8bit(r, g, b);
+        bool pattern_on;
+        Color8bit pattern = getRandomAnimation(address, state, pattern_on);
+        if (pattern_on) {
+            return pattern;
+        } else {
+            return lightHausPattern(address, state, freq);
+        }
     }
 }
 
@@ -121,12 +125,4 @@ Color8bit getLinesColorPortable(int address, ControllerState state, int16_t* fre
     } else {
         return lightHausPattern(address, state, freq);
     }
-
-    // // crappy mod scroll example
-    // float position.x, position.y, position.z;
-    // mapping_config.addressToCartesianPoint(address, position.x, position.y, position.z);
-    // int r = int(255.0*fabs(position.y+state.tick/3)/(mapping_config.pitch_width_half)) % 255;
-    // int g = int(255.0*fabs(position.x+state.tick/3)/(mapping_config.pitch_length_half)) % 255;
-    // int b = 255-r;
-    // return Color8bit(r, g, b);
 }
