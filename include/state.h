@@ -62,7 +62,7 @@ public:
 
     PostAnimation post_animations[8];
 
-    int threshold =  MAX_SAFE_RAND - 100;
+    int threshold =  MAX_SAFE_RAND - 10000;
     int divisor = 250;
 
     void update(const size_t& tick) {
