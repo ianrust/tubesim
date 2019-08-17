@@ -33,9 +33,9 @@ Color8bit lightHausPattern(const size_t& address, const ControllerState& state, 
     mapping_config.addressToLighthausParameter(address, state.schedule_datum.num_wraps, state.schedule_datum.speed, state.tick, ratio);
     Position position = mapping_config.addressToCartesianPoint(address);
     if (position.x < 0) {
-        return interpolate(state.schedule_datum.left_color1, state.schedule_datum.left_color2, ratio);
+        return normalize(interpolate(state.schedule_datum.left_color1, state.schedule_datum.left_color2, ratio));
     } else {
-        return interpolate(state.schedule_datum.right_color1, state.schedule_datum.right_color2, ratio);
+        return normalize(interpolate(state.schedule_datum.right_color1, state.schedule_datum.right_color2, ratio));
     }
 }
 
