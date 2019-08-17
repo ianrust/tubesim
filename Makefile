@@ -7,6 +7,9 @@ js:
 server:
 	python3 -m http.server
 
+opensite:
+	open "http://0.0.0.0:8000"
+
 website: images js server
 
 c:

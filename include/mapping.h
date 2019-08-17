@@ -64,7 +64,7 @@ public:
         positions[5] = Position(pitch_length_half, -goal_width_half);
         positions[6] = Position(-1, 0); // line direction
 
-        // initalize caches
+        // initialize caches
         for (size_t i = 0; i < total_leds; i++) {
             addressToCartesianPoint_cache[i] = Position();
             addressToImageIndex_cache[i] = ImageIndex();
@@ -73,6 +73,24 @@ public:
 
     bool isGoal(const size_t& address) {
         return channels[int(address / leds_per_channel)] == ChannelType::GOALPOST;
+    }
+
+    int getGoalNumber(size_t address) {
+        int index = int(address / leds_per_channel);
+
+        if (index == 0) {
+            return 1;
+        }
+        if (index == 1) {
+            return 2;
+        }
+        if (index == 4) {
+            return 3;
+        }
+        if (index == 5) {
+            return 4;
+        }
+        return 0;
     }
 
     bool isLine(const size_t& address) {
