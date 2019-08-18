@@ -103,6 +103,7 @@ EMSCRIPTEN_BINDINGS(my_module) {
         .property("goal_right", &ControllerState::goal_right)
         .property("music_on", &ControllerState::music_on)
         .function("updateEvent", &ControllerState::updateEvent)
+        .function("updatePattern", &ControllerState::updatePattern)
         .function("updateOutputState", &ControllerState::updateOutputState)
         ;
     value_array<ColorNormalized>("ColorNormalized")

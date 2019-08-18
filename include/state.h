@@ -8,6 +8,8 @@ inline int safe_rand() {
     return rand() % MAX_SAFE_RAND;
 }
 
+Color8bit white = Color8bit(255, 255, 255);
+
 class PostAnimation {
 public:
     Animation animation;
@@ -81,6 +83,11 @@ public:
     bool goal_left = false;
     bool goal_right = false;
     bool music_on = false;
+
+    string current_pattern = "";
+    uint32_t current_pattern_tick = 0;
+    Color8bit current_pattern_color = white;
+
     uint32_t tick = 0;
     ScheduleDatum schedule_datum;
     Time now_stored = {
@@ -98,6 +105,18 @@ public:
 
         if (button_right) {
             last_tick_right = tick;
+        }
+    }
+
+    void updatePattern(string new_pattern, bool reset_tick, int red, int green, int blue) {
+        current_pattern = new_pattern;
+
+        if (reset_tick) {
+            current_pattern_tick = tick;
+        }
+
+        if (red && green && blue) {
+            current_pattern_color = Color8bit(red, green, blue);
         }
     }
 

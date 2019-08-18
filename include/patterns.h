@@ -10,7 +10,6 @@
 
 using namespace std;
 
-Color8bit white = Color8bit(255, 255, 255);
 Color8bit black = Color8bit(0, 0, 0);
 Color8bit green = Color8bit(0, 255, 0);
 
@@ -18,12 +17,13 @@ Color8bit green = Color8bit(0, 255, 0);
  * A test pattern to see ticks and sim working.
  */
 Color8bit SpiralPattern(size_t address, ControllerState state, int16_t* freq) {
+    // Do not render the spiral where it would not be valid
     ImageIndex image_index = mapping_config.addressToImageIndex(address);
     if (!image_index.valid) {
         return black;
     }
 
-    int periodNumber = state.tick / 10;
+    int periodNumber = (state.tick - state.current_pattern_tick) / 10;
     int interval = 120 - periodNumber;
 
     if (interval < 8) {
@@ -39,7 +39,7 @@ Color8bit SpiralPattern(size_t address, ControllerState state, int16_t* freq) {
         float z_position = 5 - interval * .05;
 
         if (z_position > position.z) {
-            return white;
+            return state.current_pattern_color;
         }
     }
 
@@ -113,7 +113,9 @@ Color8bit explode(const size_t& address, const Position& position, const Positio
 //    - the address of the LED
 //    - the controller state
 Color8bit getGoalsColorPortable(const size_t& address, const ControllerState& state, int16_t* freq) {
-    return SpiralPattern(address, state, freq);
+    if (state.current_pattern == "s") {
+        return SpiralPattern(address, state, freq);
+    }
 
     ImageIndex image_index = mapping_config.addressToImageIndex(address);
     Position position = mapping_config.addressToCartesianPoint(address);

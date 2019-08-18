@@ -36,32 +36,65 @@ var Module = {
     }
 };
 
-var initializeButtons = function(goals) {
-  const left = document.getElementById("left");
-  const right = document.getElementById("right");
-  const music = document.getElementById("music");
-  const clear = document.getElementById("clear");
-  const timeOfDay = document.getElementById("timeOfDay");
+function hexToRgb(hex) {
+    const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+    return result ? {
+        r: parseInt(result[1], 16),
+        g: parseInt(result[2], 16),
+        b: parseInt(result[3], 16)
+    } : null;
+}
 
-  left.addEventListener('click', (e) => {
-      goals.state.updateEvent(true, false);
-  });
+let currentPattern = '';
+let currentColor = {r: 255, g: 255, b: 255};
 
-  right.addEventListener('click', (e) => {
-      goals.state.updateEvent(false, true);
-  });
+const initializeButtons = function(goals) {
+    const left = document.getElementById("left");
+    const right = document.getElementById("right");
+    const music = document.getElementById("music");
+    const clear = document.getElementById("clear");
+    const timeOfDay = document.getElementById("timeOfDay");
+    const patternInput = document.getElementById("patternInput");
+    const colorPicker = document.getElementById("colorPicker");
 
-  music.addEventListener('click', (e) => {
-      goals.state.music_on = !goals.state.music_on;
-  });
+    left.addEventListener('click', (e) => {
+        goals.state.updateEvent(true, false);
+    });
 
-  clear.addEventListener('click', (e) => {
-      goals.state.goal_left = false;
-      goals.state.goal_right = false;
-      goals.state.music_on = false;
-  });
+    right.addEventListener('click', (e) => {
+        goals.state.updateEvent(false, true);
+    });
 
-  timeOfDay.addEventListener('input', function() {
-      goals.state.now_stored = Module.timeFromDaySeconds(parseInt(timeOfDay.value));
-  });
+    music.addEventListener('click', (e) => {
+        goals.state.music_on = !goals.state.music_on;
+    });
+
+    clear.addEventListener('click', (e) => {
+        goals.state.goal_left = false;
+        goals.state.goal_right = false;
+        goals.state.music_on = false;
+    });
+
+    timeOfDay.addEventListener('input', function() {
+        goals.state.now_stored = Module.timeFromDaySeconds(parseInt(timeOfDay.value));
+    });
+
+    patternInput.addEventListener('input', function(e) {
+        currentPattern = e.data;
+
+        const {r, g, b} = currentColor;
+        goals.state.updatePattern(currentPattern, true, r, g, b);
+    });
+
+    colorPicker.addEventListener('input', function(e) {
+        const newColor = hexToRgb(e.target.value);
+        if (!newColor) {
+            return;
+        }
+
+        currentColor = newColor;
+
+        const {r, g, b} = currentColor;
+        goals.state.updatePattern(currentPattern, false, r, g, b);
+    });
 }
