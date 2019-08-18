@@ -84,17 +84,12 @@ Color8bit getGoalsColorPortable(const size_t& address, const ControllerState& st
         return Color8bit(0, 0, 0);
     }
 
-//    normalize255(freq_buffer.getArray(image_index.y));
     if (state.music_on) {
-//        if (isClapping(freq_buffer.getArray(0))) {
-//            return Color8bit(255, 255, 255);
-//        } else {
             size_t distance_from_center = (image_index.y > mapping_config.goal_led_strip_length_cropped/2) ?
                                             image_index.y - mapping_config.goal_led_strip_length_cropped/2 :
                                             mapping_config.goal_led_strip_length_cropped/2 - image_index.y;
             Color8bit spec_color = randColor((image_index.x + 0*state.tick/2) % mapping_config.num_strips, freq_buffer.getArray(distance_from_center));
             return interpolate(spec_color, Color8bit(0,0,0), float(distance_from_center*3)/(sum(freq_buffer.getArray(0))));
-//        }
     } else {
         float goal_ratio_left, goal_ratio_right;
         state.getGoalTimeRatio(goal_ratio_left, goal_ratio_right);

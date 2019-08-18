@@ -87,14 +87,14 @@ int16_t twoDPerlin(ImageIndex image_index, int16_t* freq, size_t offset) {
     return (left * (1-x_ratio) + right * x_ratio)+100;
 }
 
-Color8bit randColor(size_t mat_address, int16_t* freq) {
-    int16_t red;
-    int16_t green;
-    int16_t blue;
+Color8bit randColor(const size_t& mat_address, int16_t* freq) {
+    int16_t red = 0;
+    int16_t green = 0;
+    int16_t blue = 0;
     int16_t offset = 100;
     for (size_t mat_index = mat_address * 7 * 3; mat_index < (mat_address + 1) * 7 * 3; mat_index++) {
         size_t spec_index = mat_index % 7;
-        if (ColorMats[mat_index]) {
+        if (ColorMats[mat_index % COLOR_MATS_SIZE]) {
             uint8_t row = (mat_index - (mat_address * 7 * 3)) / 7;
 //            offset = 0;
 //            if (spec_index == 5 || spec_index == 6) {

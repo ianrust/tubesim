@@ -174,7 +174,7 @@ public:
     // num_wraps around the pole interpolated b/w 2 colors (parametrizes by ratio). wrapps on speed
     // which is in m/(offset index). offset is usually state.tick but you decide!
     void addressToLighthausParameter(const size_t& address, const float& num_wraps, const float& speed, const size_t& offset, float& ratio) {
-        float progress;
+        float progress = 0;
         // progress is the meter distance from midline to top of pole, manhattan distance;
         if (isGoal(address)) {
             ImageIndex image_index = addressToImageIndex(address);

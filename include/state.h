@@ -81,6 +81,8 @@ public:
     bool goal_left = false;
     bool goal_right = false;
     bool music_on = false;
+    uint32_t change_state_count = 0;
+    uint32_t music_debounce = 4;
     uint32_t tick = 0;
     ScheduleDatum schedule_datum;
     Time now_stored = {
@@ -117,7 +119,14 @@ public:
     // Arduino Interface
 
     void update(bool button_left, bool button_right, int16_t* freq, Time now) {
-        music_on = sum(freq) > 0;
+        bool candidate_music_on = sum(freq) > 0;
+        if (music_on != candidate_music_on) {
+            change_state_count++;
+            if (change_state_count > music_debounce) {
+                music_on = !music_on;
+                change_state_count = 0;
+            }
+        }
         updateEvent(button_left, button_right);
         now_stored = now;
         updateOutputState();

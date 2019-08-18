@@ -83,6 +83,8 @@ void loop() {
   Serial.println(now.minutes);
   Serial.print("Seconds: ");
   Serial.println(now.seconds);
+  Serial.print("music on? ");
+  Serial.print(state.music_on);
 #endif
 
   // slow indicator loop
