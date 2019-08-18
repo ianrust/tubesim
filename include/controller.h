@@ -36,7 +36,7 @@ unsigned long last_frame_micros = 0;
 #endif
 
 void setup() {
-  timer.init();ables();
+  timer.init();
   initializeTrigTables();
   initializePerlinMats();
 
