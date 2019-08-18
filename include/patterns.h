@@ -88,7 +88,7 @@ Color8bit getGoalsColorPortable(const size_t& address, const ControllerState& st
             size_t distance_from_center = (image_index.y > mapping_config.goal_led_strip_length_cropped/2) ?
                                             image_index.y - mapping_config.goal_led_strip_length_cropped/2 :
                                             mapping_config.goal_led_strip_length_cropped/2 - image_index.y;
-            Color8bit spec_color = randColor((image_index.x + 0*state.tick/2) % mapping_config.num_strips, freq_buffer.getArray(distance_from_center));
+            Color8bit spec_color = freq_buffer.getColor(distance_from_center, mapping_config.getStrip(address));
             return interpolate(spec_color, Color8bit(0,0,0), float(distance_from_center*3)/(sum(freq_buffer.getArray(0))));
     } else {
         float goal_ratio_left, goal_ratio_right;
@@ -117,7 +117,10 @@ Color8bit getLinesColorPortable(const size_t& address, const ControllerState& st
         if (isClapping(freq_buffer.getArray(0))) {
             return Color8bit(255, 255, 255);
         } else {
-            return getPerlinColor(address, freq_buffer.getArray(0));
+            Color8bit c1 = freq_buffer.getColor(0, ((address % mapping_config.leds_per_channel) / LINES_BINS) % 12);
+            Color8bit c2 = freq_buffer.getColor(0, (((address % mapping_config.leds_per_channel) / LINES_BINS) % 12 + 1) %12);
+            float ratio_line = float(address % LINES_BINS) / LINES_BINS ;
+            return interpolate(c1, c2, ratio_line);
         }
     } else if (state.goal_right) {
         float goal_ratio_left, goal_ratio_right;

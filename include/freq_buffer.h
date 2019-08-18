@@ -1,5 +1,8 @@
 #pragma once
 
+#include "perlin.h"
+#include "types.h"
+
 //7x45=315 for tube size
 //ring buffer
 class FreqBuffer {
@@ -23,6 +26,10 @@ public:
         return &buffer[getShiftedTimeIndex(time_index)*buffer_depth];
     }
 
+    Color8bit getColor(size_t time_index, size_t strip_index) {
+        return color_buffer[getShiftedTimeIndex(time_index) * color_buffer_depth + (strip_index % color_buffer_depth)];
+    }
+
     void accumulate(int16_t* freq) {
         // discard buffer overrun
         for (size_t spec_index = 0; spec_index < buffer_depth; spec_index++) {
@@ -42,6 +49,9 @@ public:
             accum_buffer[spec_index] = 0;
         }
         num_accums = 0;
+
+        // store associated colors
+        saveColors();
     }
 
 // js interface
@@ -54,6 +64,8 @@ public:
         buffer[buffer_index*buffer_depth + 4] = freq4;
         buffer[buffer_index*buffer_depth + 5] = freq5;
         buffer[buffer_index*buffer_depth + 6] = freq6;
+
+        saveColors();
     }
 private:
     int16_t buffer[315];
@@ -62,9 +74,19 @@ private:
     // operates as a ring buffer
     size_t buffer_index = 0;
 
+    // 12 rows, 45 length
+    size_t color_buffer_depth = 12;
+    Color8bit color_buffer[50*12];
+
     // for accumulated input
     int16_t accum_buffer[7];
     int16_t num_accums = 0;
+
+    void saveColors() {
+        for (size_t strip_index = 0; strip_index < color_buffer_depth; strip_index++) {
+            color_buffer[buffer_index*color_buffer_depth + strip_index] = randColor(strip_index, getArray(0));
+        }
+    }
 
     size_t getShiftedTimeIndex(size_t time_index) {
         if (time_index > buffer_index) {

@@ -84,6 +84,10 @@ public:
         return address / leds_per_channel;
     }
 
+    size_t getStrip(const size_t& address) {
+        return (address % leds_per_channel) / goal_led_strip_length;
+    }
+
     ChannelType getChannelType(const size_t& channel) {
         return channels[channel];
     }

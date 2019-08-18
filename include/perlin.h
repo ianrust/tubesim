@@ -8,8 +8,8 @@ const size_t GOAL_RADIAL_BINS = 4;
 const size_t GOAL_VERT_BINS = 10;
 const size_t LINES_BINS = 50;
 
-const size_t COLOR_MATS_SIZE = 50*7;
-const int32_t SCALE_FREQ = (2);
+const size_t COLOR_MATS_SIZE = 100*7;
+const int32_t SCALE_FREQ = 100;
 
 // row-wise encoded array of matrices that map from spectrum to unit vector in color space.
 bool ColorMats[COLOR_MATS_SIZE];
@@ -91,15 +91,11 @@ Color8bit randColor(const size_t& mat_address, int16_t* freq) {
     int16_t red = 0;
     int16_t green = 0;
     int16_t blue = 0;
-    int16_t offset = 100;
+    int16_t offset = 500;
     for (size_t mat_index = mat_address * 7 * 3; mat_index < (mat_address + 1) * 7 * 3; mat_index++) {
         size_t spec_index = mat_index % 7;
         if (ColorMats[mat_index % COLOR_MATS_SIZE]) {
             uint8_t row = (mat_index - (mat_address * 7 * 3)) / 7;
-//            offset = 0;
-//            if (spec_index == 5 || spec_index == 6) {
-//                offset = 125;
-//            }
             if (row == 0) {
                 red += freq[spec_index] + offset;
             } else if (row == 1) {
