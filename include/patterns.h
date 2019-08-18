@@ -14,7 +14,8 @@ Color8bit black = Color8bit(0, 0, 0);
 Color8bit green = Color8bit(0, 255, 0);
 
 /**
- * A test pattern to see ticks and sim working.
+ * Flash one tube at a time in a spiral. At the beginning only the buttom of the tube is lit and over time,
+ * more and more of the tube becomes lit. The spiral also goes faster over time.
  */
 Color8bit SpiralPattern(size_t address, ControllerState state, int16_t* freq) {
     // Do not render the spiral where it would not be valid
@@ -25,7 +26,6 @@ Color8bit SpiralPattern(size_t address, ControllerState state, int16_t* freq) {
 
     int periodNumber = (state.tick - state.current_pattern_tick) / 10;
     int interval = 120 - periodNumber;
-
     if (interval < 8) {
         interval = 8;
     }
@@ -33,17 +33,24 @@ Color8bit SpiralPattern(size_t address, ControllerState state, int16_t* freq) {
     int litGoal = (periodNumber % 4) + 1;
     int goalNumber = mapping_config.getGoalNumber(address);
 
-
     if (goalNumber == litGoal) {
         Position position = mapping_config.addressToCartesianPoint(address);
-        float z_position = 5 - interval * .05;
 
+        // Light up the tube from the bottom to the top over time.
+        float z_position = 5 - interval * .05;
         if (z_position > position.z) {
             return state.current_pattern_color;
         }
     }
 
     return black;
+}
+
+/**
+ * One color!
+ */
+Color8bit OneColor(size_t address, ControllerState state, int16_t* freq) {
+    return state.current_pattern_color;
 }
 
 /**
@@ -115,6 +122,10 @@ Color8bit explode(const size_t& address, const Position& position, const Positio
 Color8bit getGoalsColorPortable(const size_t& address, const ControllerState& state, int16_t* freq) {
     if (state.current_pattern == "s") {
         return SpiralPattern(address, state, freq);
+    }
+
+    if (state.current_pattern == "o") {
+        return OneColor(address, state, freq);
     }
 
     ImageIndex image_index = mapping_config.addressToImageIndex(address);
