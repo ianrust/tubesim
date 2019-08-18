@@ -123,7 +123,7 @@ Color8bit randColor(size_t mat_address, int16_t* freq) {
     }
 }
 
-Color8bit getPerlinColor(size_t& address, int16_t* freq) {
+Color8bit getPerlinColor(const size_t& address, int16_t* freq) {
     if (mapping_config.isGoal(address)) {
         ImageIndex image_index = mapping_config.addressToImageIndex(address);
         if (!image_index.valid) {

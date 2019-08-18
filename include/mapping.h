@@ -72,25 +72,29 @@ public:
         }
     }
 
-    bool isGoal(size_t address) {
+    bool isGoal(const size_t& address) {
         return channels[int(address / leds_per_channel)] == ChannelType::GOALPOST;
     }
 
-    bool isLine(size_t address) {
+    bool isLine(const size_t& address) {
         return channels[int(address / leds_per_channel)] == ChannelType::LINES;
     }
 
-    ChannelType getChannelType(size_t channel) {
+    size_t getChannel(const size_t& address) {
+        return address / leds_per_channel;
+    }
+
+    ChannelType getChannelType(const size_t& channel) {
         return channels[channel];
     }
 
-    Position getPosition(size_t channel) {
+    Position getPosition(const size_t& channel) {
         return positions[channel];
     }
 
     //assumes all LEDs are in 1 group for each pole
     //removes last config-defined address on each shortened strip
-    ImageIndex addressToImageIndex(size_t address) {
+    ImageIndex addressToImageIndex(const size_t& address) {
         if (addressToImageIndex_cache[address].cached) {
             return addressToImageIndex_cache[address];
         } else {
@@ -130,7 +134,7 @@ public:
  
     // assumes all LEDs are in 1 group for each pole, 12 strips
     //  TODO add position of pixel around the pole
-    Position addressToCartesianPoint(size_t address) {
+    Position addressToCartesianPoint(const size_t& address) {
         if (addressToCartesianPoint_cache[address].cached) {
             return addressToCartesianPoint_cache[address];
         } else {
@@ -169,7 +173,7 @@ public:
 
     // num_wraps around the pole interpolated b/w 2 colors (parametrizes by ratio). wrapps on speed
     // which is in m/(offset index). offset is usually state.tick but you decide!
-    void addressToLighthausParameter(size_t address, float num_wraps, float speed, size_t offset, float& ratio) {
+    void addressToLighthausParameter(const size_t& address, const float& num_wraps, const float& speed, const size_t& offset, float& ratio) {
         float progress;
         // progress is the meter distance from midline to top of pole, manhattan distance;
         if (isGoal(address)) {
@@ -183,7 +187,7 @@ public:
                 progress = position.x;
             }
         }
-        float period = (pitch_length_half + goal_led_strip_length_cropped*pixel_height) / num_wraps;
+        float period = (pitch_length_half + (goal_led_strip_length_cropped-1)*pixel_height) / num_wraps;
 
         // fabs/fmod are slow
         progress -= speed*offset;
@@ -198,10 +202,10 @@ public:
 
     // interpolate b/w 2 colors in the direction defined by direction
     void addressToLighthausParameterCartesian(
-        size_t address, 
-        float scale,
-        float speed,
-        size_t offset,
+        const size_t& address,
+        const float& scale,
+        const float& speed,
+        const size_t& offset,
         const Position& direction,
         float& ratio
         ) {

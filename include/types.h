@@ -34,6 +34,29 @@ Color8bit interpolate(const Color8bit& c1, const Color8bit& c2, float ratio) {
     return interp_value;
 };
 
+Color8bit normalize(const Color8bit& in_color) {
+    uint8_t max = 0;
+    if (in_color.r > max) {
+        max = in_color.r;
+    }
+    if (in_color.g > max) {
+        max = in_color.g;
+    }
+    if (in_color.b > max) {
+        max = in_color.b;
+    }
+
+    if (max == 0) {
+        return in_color;
+    }
+
+    int r_adjusted = in_color.r * 255 / max;
+    int g_adjusted = in_color.g * 255 / max;
+    int b_adjusted = in_color.b * 255 / max;
+
+    return Color8bit(r_adjusted, g_adjusted, b_adjusted);
+}
+
 uint8_t interpolate(const uint8_t& v1, const uint8_t& v2, float ratio) {
     return v1 * (1-ratio) + v2 * ratio;
 }
@@ -178,6 +201,15 @@ struct FlashImage {
         height = height_;
         start = start_;
     }
+};
+
+struct Animation {
+    const FlashImage* flash_image;
+    size_t speed_divisor_x;
+    size_t speed_divisor_y;
+    bool x_forward;
+    bool y_forward;
+    float mask_prob;
 };
 
 struct Cached {
