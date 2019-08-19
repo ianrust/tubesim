@@ -89,8 +89,8 @@ void recvWithEndMarker() {
 
 void showNewData() {
  if (newData == true) {
-   Serial.print("This just in ... ");
    Serial.println(int(receivedChars[0]));
+   Serial.print("This just in ... ");
    Serial.println(receivedChars);
    newData = false;
  }
