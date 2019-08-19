@@ -57,8 +57,8 @@ boolean newData = false;
 void recvWithEndMarker() {
   static boolean recvInProgress = false;
   static byte ndx = 0;
-  char startMarker = '<';
-  char endMarker = '>';
+  char startMarker = 9;
+  char endMarker = 8;
   char rc;
 
   // if (Serial.available() > 0) {
@@ -90,6 +90,7 @@ void recvWithEndMarker() {
 void showNewData() {
  if (newData == true) {
    Serial.print("This just in ... ");
+   Serial.println(int(receivedChars[0]));
    Serial.println(receivedChars);
    newData = false;
  }

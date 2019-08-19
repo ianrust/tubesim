@@ -120,6 +120,12 @@ Color8bit explode(const size_t& address, const Position& position, const Positio
 //    - the address of the LED
 //    - the controller state
 Color8bit getGoalsColorPortable(const size_t& address, const ControllerState& state, int16_t* freq) {
+    ImageIndex image_index = mapping_config.addressToImageIndex(address);
+    Position position = mapping_config.addressToCartesianPoint(address);
+    if (!image_index.valid) {
+        return Color8bit(0, 0, 0);
+    }
+
     if (state.current_pattern == "s") {
         return SpiralPattern(address, state, freq);
     }
@@ -128,11 +134,6 @@ Color8bit getGoalsColorPortable(const size_t& address, const ControllerState& st
         return OneColor(address, state, freq);
     }
 
-    ImageIndex image_index = mapping_config.addressToImageIndex(address);
-    Position position = mapping_config.addressToCartesianPoint(address);
-    if (!image_index.valid) {
-        return Color8bit(0, 0, 0);
-    }
     normalize255(freq);
     if (state.music_on) {
         if (isClapping(freq)) {

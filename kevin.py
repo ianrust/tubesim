@@ -29,6 +29,8 @@ def map_mini_output_to_pattern(status: int, data: Tuple[int, int, int]):
     if key_id == 1:
         print('shit')
 
+    bytes_to_send = struct.pack('IIII', 9, 10, 10, 8)
+    ser.write(bytes_to_send)
 
 # run the event loop
 while True:
