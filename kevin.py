@@ -1,3 +1,4 @@
+import struct
 from typing import Tuple
 import pygame.midi
 import serial
@@ -6,30 +7,51 @@ pygame.midi.init()
 
 print('device_count', pygame.midi.get_count())
 
-device_info = pygame.midi.get_device_info(0)
+device_id = 3
+
+device_info = pygame.midi.get_device_info(device_id)
 print('device_info', device_info)
 
 # open a specific midi device
-inp = pygame.midi.Input(0)
+inp = pygame.midi.Input(device_id)
 
-use_serial = False
+use_serial = True
 
 if use_serial:
     print('opening port')
-    ser = serial.Serial('/dev/ttyUSB0')  # open serial port
+    ser = serial.Serial('/dev/ttyACM0')  # open serial port
     print('serial', ser.name)  # check which port was really used
 
+red = 0
+green = 0
+blue = 0
 
 def map_mini_output_to_pattern(status: int, data: Tuple[int, int, int]):
-    [key_id, __, __] = data
+    [key_id, knob_value, __] = data
 
-    if key_id == 0:
-        print('fuck')
+    pattern = 'd'
+    reset_ticks = 0
 
-    if key_id == 1:
-        print('shit')
+    # When we click a button, we want to update the patten
+    if status == 192:
+        reset_ticks = 1
+        if key_id == 0:
+            pattern = 's'
 
-    bytes_to_send = struct.pack('IIII', 9, 10, 10, 8)
+        if key_id == 1:
+            pattern = '0'
+
+    # When we turn a knob, we want to update rgb
+    if status == 176:
+        reset_ticks = 0
+        if key_id == 1:
+            red = knob_value
+        if key_id == 2:
+            green = knob_value
+        if key_id == 3:
+            blue = knob_value
+
+    bytes_to_send = struct.pack('BBBBBBB', 254, pattern, reset_ticks, red, green, blue, 255)
     ser.write(bytes_to_send)
 
 # run the event loop
