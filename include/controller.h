@@ -49,6 +49,52 @@ void setup() {
   delay(100);
 }
 
+const byte numChars = 32;
+char receivedChars[numChars]; // an array to store the received data
+
+boolean newData = false;
+
+void recvWithEndMarker() {
+  static boolean recvInProgress = false;
+  static byte ndx = 0;
+  char startMarker = '<';
+  char endMarker = '>';
+  char rc;
+
+  // if (Serial.available() > 0) {
+  while (Serial.available() > 0 && newData == false) {
+      rc = Serial.read();
+
+      if (recvInProgress == true) {
+          if (rc != endMarker) {
+              receivedChars[ndx] = rc;
+              ndx++;
+              if (ndx >= numChars) {
+                  ndx = numChars - 1;
+              }
+          }
+          else {
+              receivedChars[ndx] = '\0'; // terminate the string
+              recvInProgress = false;
+              ndx = 0;
+              newData = true;
+          }
+      }
+
+      else if (rc == startMarker) {
+          recvInProgress = true;
+      }
+  }
+}
+
+void showNewData() {
+ if (newData == true) {
+   Serial.print("This just in ... ");
+   Serial.println(receivedChars);
+   newData = false;
+ }
+}
+
 void loop() {
   state.update(!digitalRead(PIN_LEFT), !digitalRead(PIN_RIGHT), freq_out, timer.now());
   for (ledIndex = 0; ledIndex < numActiveAddresses ; ledIndex++) {
@@ -85,8 +131,12 @@ void loop() {
   if (state.tick % 10 == 0) {
     digitalWrite(LED_BUILTIN, timer.seconds() % 2);
   }
+
+  recvWithEndMarker();
+  showNewData();
 }
 #else
+
 
 uint64_t sample_period_micros = 3333; // 30 Hz
 uint64_t last_micros_sample = 0;
@@ -115,3 +165,6 @@ void loop() {
 }
 
 #endif
+
+
+
