@@ -82,7 +82,7 @@ public:
     bool goal_right = false;
     bool music_on = false;
     uint32_t change_state_count = 0;
-    uint32_t music_debounce = 4;
+    uint32_t music_debounce = 200;
     uint32_t tick = 0;
     ScheduleDatum schedule_datum;
     Time now_stored = {
