@@ -63,11 +63,11 @@ Color8bit explode(const size_t& address, const Position& position, const Positio
     float dz = position.z - origin.z;
     float distance_from_base_squared = dx*dx + dy*dy + dz*dz;
     float max_distance_squared = mapping_config.pitch_length_half * mapping_config.pitch_length_half;
-    float my_ratio = pow(distance_from_base_squared / max_distance_squared, 0.2);
+    float my_ratio = distance_from_base_squared / max_distance_squared;
     if (ratio > my_ratio) {
         return Color8bit(uint8_t(255*rand())%255, uint8_t(255*rand())%255, uint8_t(255*rand())%255);
     } else {
-        float front_progress = 0.1*(my_ratio - ratio) / (1-ratio);
+        float front_progress = 0.3*(my_ratio - ratio) / (1-ratio);
         return Color8bit(uint8_t(255*front_progress*rand())%255, uint8_t(255*front_progress*rand())%255, uint8_t(255*front_progress*rand())%255);
     }
 }
