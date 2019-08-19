@@ -3,6 +3,7 @@ class GoalController {
         this.mapping_config = new Module.MappingConfig();
         this.song = song;
         this.state = new Module.ControllerState();
+        this.freq_buffer = new Module.FreqBuffer();
 
         this.channels = []
         for (let i = 0; i < 8; i++) {
@@ -25,26 +26,21 @@ class GoalController {
     update() {
         let freq = this.song[this.state.tick % song.length];
         this.state.updateOutputState();
+        this.freq_buffer.saveSingle(freq[0],
+                                    freq[1],
+                                    freq[2],
+                                    freq[3],
+                                    freq[4],
+                                    freq[5],
+                                    freq[6]);
         for (let i = 0; i < this.totalLeds; i++) {
             let color;
             let postIndex = Math.floor(i/this.mapping_config.leds_per_channel);
             if (this.mapping_config.isGoal(i)) {
-                color = Module.getGoalsColor(i, this.state, freq[0],
-                                                            freq[1],
-                                                            freq[2],
-                                                            freq[3],
-                                                            freq[4],
-                                                            freq[5],
-                                                            freq[6]);
+                color = Module.getGoalsColor(i, this.state, this.freq_buffer);
                 this.setLED(i, color);
             } else if (this.mapping_config.isLine(i)) {
-                color = Module.getLinesColor(i, this.state, freq[0],
-                                                            freq[1],
-                                                            freq[2],
-                                                            freq[3],
-                                                            freq[4],
-                                                            freq[5],
-                                                            freq[6]);
+                color = Module.getLinesColor(i, this.state, this.freq_buffer);
                 this.setLED(i, color);
             }
         }

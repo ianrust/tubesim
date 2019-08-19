@@ -6,6 +6,7 @@
 #include "types.h"
 #include "fastmath.h"
 #include "images.h"
+#include "perlin.h"
 #include "state.h"
 
 using namespace std;
@@ -68,7 +69,7 @@ Color8bit testLightHausPattern(const size_t& address, const ControllerState& sta
 //    float theta = fmodFast(state.tick * 0.03, 2*M_PI);
 //    mapping_config.addressToLighthausParameterCartesian(address, 3, 0.1, state.tick, Position(cosFast(theta), sinFast(theta), 0), ratio);
     mapping_config.addressToLighthausParameter(address, 0.5, 0.1, state.tick, ratio);
-    return interpolate(Color8bit(138, 43, 226), Color8bit(0, 255, 0), ratio);
+    return interpolate(Color8bit(138, 43, 226), Color8bit(255, 182, 93), ratio);
 }
 
 Color8bit lightHausPattern(const size_t& address, const ControllerState& state, int16_t* freq) {
@@ -119,7 +120,7 @@ Color8bit explode(const size_t& address, const Position& position, const Positio
 // The main color function, takes in:
 //    - the address of the LED
 //    - the controller state
-Color8bit getGoalsColorPortable(const size_t& address, const ControllerState& state, int16_t* freq) {
+Color8bit getGoalsColorPortable(const size_t& address, const ControllerState& state, FreqBuffer& freq_buffer) {
     ImageIndex image_index = mapping_config.addressToImageIndex(address);
     Position position = mapping_config.addressToCartesianPoint(address);
     if (!image_index.valid) {
@@ -136,13 +137,11 @@ Color8bit getGoalsColorPortable(const size_t& address, const ControllerState& st
 
     normalize255(freq);
     if (state.music_on) {
-        if (isClapping(freq)) {
-            return Color8bit(255, 255, 255);
-        } else {
-            return Color8bit(int(freq[0]*2*(address % 300) / 8),
-                             int((freq[1] + freq[2] + freq[3] + freq[4])/4*(address % 100)/16),
-                             int(freq[5]*(address % 45)));
-        }
+            size_t distance_from_center = (image_index.y > mapping_config.goal_led_strip_length_cropped/2) ?
+                                            image_index.y - mapping_config.goal_led_strip_length_cropped/2 :
+                                            mapping_config.goal_led_strip_length_cropped/2 - image_index.y;
+            Color8bit spec_color = freq_buffer.getColor(distance_from_center, mapping_config.getStrip(address));
+            return interpolate(spec_color, Color8bit(0,0,0), float(distance_from_center*3)/(sum(freq_buffer.getArray(0))));
     } else {
         float goal_ratio_left, goal_ratio_right;
         state.getGoalTimeRatio(goal_ratio_left, goal_ratio_right);
@@ -158,17 +157,24 @@ Color8bit getGoalsColorPortable(const size_t& address, const ControllerState& st
         if (pattern_on) {
             return pattern;
         } else {
-            return lightHausPattern(address, state, freq);
+            return lightHausPattern(address, state, freq_buffer.getArray(0));
         }
     }
 }
 
 // same as above, though this is for lines
-Color8bit getLinesColorPortable(const size_t& address, const ControllerState& state, int16_t* freq) {
-    return white;
-
+Color8bit getLinesColorPortable(const size_t& address, const ControllerState& state, FreqBuffer& freq_buffer) {
     Position position = mapping_config.addressToCartesianPoint(address);
-    if (state.goal_right) {
+    if (state.music_on) {
+        if (isClapping(freq_buffer.getArray(0))) {
+            return Color8bit(255, 255, 255);
+        } else {
+            Color8bit c1 = freq_buffer.getColor(0, ((address % mapping_config.leds_per_channel) / LINES_BINS) % 12);
+            Color8bit c2 = freq_buffer.getColor(0, (((address % mapping_config.leds_per_channel) / LINES_BINS) % 12 + 1) %12);
+            float ratio_line = float(address % LINES_BINS) / LINES_BINS ;
+            return interpolate(c1, c2, ratio_line);
+        }
+    } else if (state.goal_right) {
         float goal_ratio_left, goal_ratio_right;
         state.getGoalTimeRatio(goal_ratio_left, goal_ratio_right);
         return explode(address, position, Position(mapping_config.pitch_length/2.0, 0, 0), goal_ratio_right);
@@ -177,6 +183,6 @@ Color8bit getLinesColorPortable(const size_t& address, const ControllerState& st
         state.getGoalTimeRatio(goal_ratio_left, goal_ratio_right);
         return explode(address, position, Position(-mapping_config.pitch_length/2.0, 0, 0), goal_ratio_left);
     } else {
-        return lightHausPattern(address, state, freq);
+        return lightHausPattern(address, state, freq_buffer.getArray(0));
     }
 }

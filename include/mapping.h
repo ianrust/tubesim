@@ -47,6 +47,7 @@ public:
     float pixel_height = 0.1;
     float goal_width_half = 2.5;
     float radius = 0.1;
+    size_t num_strips = 6;
 
     // line settings
     float pixel_length = 0.05;
@@ -99,6 +100,10 @@ public:
 
     size_t getChannel(const size_t& address) {
         return address / leds_per_channel;
+    }
+
+    size_t getStrip(const size_t& address) {
+        return (address % leds_per_channel) / goal_led_strip_length;
     }
 
     ChannelType getChannelType(const size_t& channel) {
@@ -191,7 +196,7 @@ public:
     // num_wraps around the pole interpolated b/w 2 colors (parametrizes by ratio). wrapps on speed
     // which is in m/(offset index). offset is usually state.tick but you decide!
     void addressToLighthausParameter(const size_t& address, const float& num_wraps, const float& speed, const size_t& offset, float& ratio) {
-        float progress;
+        float progress = 0;
         // progress is the meter distance from midline to top of pole, manhattan distance;
         if (isGoal(address)) {
             ImageIndex image_index = addressToImageIndex(address);
