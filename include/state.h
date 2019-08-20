@@ -139,5 +139,5 @@ public:
 private:
     uint32_t last_tick_left = 0;
     uint32_t last_tick_right = 0;
-    uint32_t goal_period = 30;
+    uint32_t goal_period = 60;
 };
