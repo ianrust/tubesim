@@ -62,7 +62,7 @@ void loop() {
       leds.setPixel(ledIndex, gamma8[color.r], gamma8[color.b], gamma8[color.g]);
     } else if (mapping_config.isLine(ledIndex)) {
       color = getLinesColorPortable(ledIndex, state, freq_buffer);
-      leds.setPixel(ledIndex, gamma8[color.r], gamma8[color.b], gamma8[color.g]);
+      leds.setPixel(ledIndex, gamma8[color.r], gamma8[color.g], gamma8[color.b]);
     } else {
       // skip inactive addresses
       ledIndex += mapping_config.leds_per_channel-1;
